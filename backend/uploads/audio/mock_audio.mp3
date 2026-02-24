@@ -1,0 +1,5 @@
+# Mock Audio File Placeholder
+# This file mimics an MP3 header to satisfy the browser player
+# In a real scenario, this would be a real binary MP3 file.
+# For now, it's a dummy file to prevent 404s.
+ID3......FakeAudio...

@@ -1,0 +1,18 @@
+UrbanEye System Startup Log
+=========================
+Timestamp: 2026-02-12 09:20:00
+Status: SUCCESS
+
+Active Services:
+----------------
+1. Citizen Frontend:  http://localhost:3000   [Running]
+2. Admin Dashboard:   http://localhost:3001   [Running]
+3. Backend API:       http://localhost:5000   [Running]
+
+Troubleshooting:
+----------------
+- If 'localhost' does not work, try '127.0.0.1'
+  > Citizen: http://127.0.0.1:3000
+  > Admin:   http://127.0.0.1:3001
+
+- Ensure you are using HTTP, not HTTPS.

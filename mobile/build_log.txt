@@ -1,0 +1,23 @@
+﻿D:\flutter\bin\flutter.bat
+ : This project is not 
+configured for the web.
+At line:1 char:44
++ ... \bin;" + $env:Path; 
+D:\flutter\bin\flutter.bat
+ build web 2>&1 | Out-F 
+...
++                         
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo        
+      : NotSpecified: (T  
+  his project is...ed f   
+ or the web.:String) [    
+], RemoteException
+    + FullyQualifiedError 
+   Id : NativeCommandErr  
+  or
+ 
+To configure this project 
+for the web, run flutter 
+create . --platforms web
