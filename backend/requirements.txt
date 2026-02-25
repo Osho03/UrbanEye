@@ -2,8 +2,8 @@ flask
 flask-cors
 pymongo
 python-dotenv
-tensorflow
-opencv-python
+tensorflow-cpu
+opencv-python-headless
 numpy
 ultralytics
 pillow
