@@ -18,7 +18,7 @@ import '../models/issue_model.dart';
 class ApiService {
   static String baseUrl = kIsWeb
       ? 'http://localhost:5000'
-      : 'https://urbaneye-backend.onrender.com';
+      : 'https://urbaneye-backend-kzb6.onrender.com';
 
   /// Configure base URL (call from settings)
   static void setBaseUrl(String url) {
