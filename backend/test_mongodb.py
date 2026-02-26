@@ -6,8 +6,10 @@ from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 
 try:
-    # Try to connect to MongoDB
-    client = MongoClient("mongodb://localhost:27017", serverSelectionTimeoutMS=5000)
+    # Use configuration from config.py to test the ACTUAL connection
+    from config import MONGO_URI
+    print(f"🔄 Connecting to: {MONGO_URI.split('@')[-1] if '@' in MONGO_URI else MONGO_URI}")
+    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
     
     # Force connection to verify it's working
     client.admin.command('ping')

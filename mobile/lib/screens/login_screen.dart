@@ -12,7 +12,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   bool _isRegisterMode = false;
   bool _obscurePassword = true;
   final _formKey = GlobalKey<FormState>();
@@ -26,8 +27,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    _animController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
-    _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeInOut);
+    _animController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 300));
+    _fadeAnim =
+        CurvedAnimation(parent: _animController, curve: Curves.easeInOut);
     _animController.forward();
   }
 
@@ -69,7 +72,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           content: Text(error),
           backgroundColor: Colors.red.shade700,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
     } else {
@@ -109,35 +113,45 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // Logo & Title
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.remove_red_eye_rounded,
-                        size: 64,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'UrbanEye',
-                      style: GoogleFonts.inter(
-                        fontSize: 36,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Citizen Reporting System',
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: Colors.white70,
-                        letterSpacing: 0.5,
+                    GestureDetector(
+                      onLongPress: () {
+                        // Secret way to show server config for creators
+                        _showServerConfig(context);
+                      },
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.remove_red_eye_rounded,
+                              size: 64,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'UrbanEye',
+                            style: GoogleFonts.inter(
+                              fontSize: 36,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Citizen Reporting System',
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              color: Colors.white70,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 40),
@@ -162,7 +176,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Text(
-                              _isRegisterMode ? 'Create Account' : 'Welcome Back',
+                              _isRegisterMode
+                                  ? 'Create Account'
+                                  : 'Welcome Back',
                               style: GoogleFonts.inter(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w700,
@@ -191,8 +207,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                   labelText: 'Full Name',
                                   prefixIcon: Icon(Icons.person_outline),
                                 ),
-                                validator: (v) =>
-                                    v == null || v.trim().isEmpty ? 'Name required' : null,
+                                validator: (v) => v == null || v.trim().isEmpty
+                                    ? 'Name required'
+                                    : null,
                               ),
                               const SizedBox(height: 16),
                             ],
@@ -206,7 +223,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                 prefixIcon: Icon(Icons.email_outlined),
                               ),
                               validator: (v) {
-                                if (v == null || v.trim().isEmpty) return 'Email required';
+                                if (v == null || v.trim().isEmpty)
+                                  return 'Email required';
                                 if (!v.contains('@')) return 'Invalid email';
                                 return null;
                               },
@@ -226,12 +244,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                         ? Icons.visibility_off_outlined
                                         : Icons.visibility_outlined,
                                   ),
-                                  onPressed: () =>
-                                      setState(() => _obscurePassword = !_obscurePassword),
+                                  onPressed: () => setState(() =>
+                                      _obscurePassword = !_obscurePassword),
                                 ),
                               ),
                               validator: (v) {
-                                if (v == null || v.isEmpty) return 'Password required';
+                                if (v == null || v.isEmpty)
+                                  return 'Password required';
                                 if (v.length < 4) return 'Min 4 characters';
                                 return null;
                               },
@@ -258,7 +277,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                 return ElevatedButton(
                                   onPressed: auth.isLoading ? null : _submit,
                                   style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -273,7 +293,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                           ),
                                         )
                                       : Text(
-                                          _isRegisterMode ? 'Create Account' : 'Sign In',
+                                          _isRegisterMode
+                                              ? 'Create Account'
+                                              : 'Sign In',
                                           style: const TextStyle(fontSize: 16),
                                         ),
                                 );
@@ -300,18 +322,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     ),
 
                     const SizedBox(height: 24),
-                    // Server config hint
-                    GestureDetector(
-                      onTap: () => _showServerConfig(context),
-                      child: Text(
-                        '⚙️ Configure Server',
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: Colors.white60,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
+                    // Server config hint removed from public view (hidden behind logo long-press)
                   ],
                 ),
               ),
@@ -336,7 +347,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () {
               ApiService.setBaseUrl(controller.text.trim());

@@ -3,8 +3,11 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 
-# Load environment variables from .env file
-load_dotenv()
+# Optional local .env loading (ignored on Render if file doesn't exist)
+basedir = os.path.abspath(os.path.dirname(__file__))
+env_path = os.path.join(basedir, '.env')
+if os.path.exists(env_path):
+    load_dotenv(env_path)
 
 app = Flask(__name__)
 # Allow UNLIMITED uploads (to fix 413 Errors completely)
@@ -50,4 +53,7 @@ def health_check():
     return {"status": "ok", "message": "UrbanEye Backend is running"}, 200
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # Ensure backend uses dynamic port from environment (essential for Render)
+    port = int(os.environ.get("PORT", 5000))
+    print(f"🚀 Starting UrbanEye Backend on port {port}...")
+    app.run(host='0.0.0.0', port=port, debug=True)
