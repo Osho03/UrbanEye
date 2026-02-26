@@ -63,7 +63,7 @@ class AuthService extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      return 'Network error: Cannot reach server. Check your connection.';
+      return 'Network error: ${ApiService.baseUrl}. Details: $e';
     }
   }
 
@@ -95,7 +95,7 @@ class AuthService extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      return 'Network error: Cannot reach server. Check your connection.';
+      return 'Network error: ${ApiService.baseUrl}. Details: $e';
     }
   }
 

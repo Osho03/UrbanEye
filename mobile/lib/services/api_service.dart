@@ -29,9 +29,8 @@ class ApiService {
 
   static Future<bool> healthCheck() async {
     try {
-      final response = await http
-          .get(Uri.parse('$baseUrl/api/health'))
-          .timeout(const Duration(seconds: 10)); // Increased timeout
+      final response = await http.get(Uri.parse('$baseUrl/api/health')).timeout(
+          const Duration(seconds: 45)); // High timeout for Render cold starts
 
       final isOk = response.statusCode == 200;
       if (!isOk) {
@@ -250,7 +249,13 @@ class ApiService {
     } catch (e) {
       print('Error getting analytics: $e');
     }
-    return {'total': 0, 'pending': 0, 'assigned': 0, 'resolved': 0};
+    return {
+      'total': 0,
+      'pending': 0,
+      'assigned': 0,
+      'resolved': 0,
+      'error': 'Network error'
+    };
   }
 
   /// Helper: Get full image URL from backend image_path
