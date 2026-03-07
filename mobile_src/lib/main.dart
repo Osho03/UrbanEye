@@ -12,14 +12,13 @@ import 'screens/my_reports_screen.dart';
 import 'screens/issue_detail_screen.dart';
 import 'screens/map_screen.dart';
 import 'screens/profile_screen.dart';
+import 'services/api_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Lock to portrait mode
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   // Set system UI overlay style
   SystemChrome.setSystemUIOverlayStyle(
@@ -31,6 +30,7 @@ void main() async {
 
   final authService = AuthService();
   await authService.loadUser();
+  await ApiService.init();
 
   runApp(
     ChangeNotifierProvider.value(
@@ -94,8 +94,13 @@ class UrbanEyeApp extends StatelessWidget {
           backgroundColor: primaryColor,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          textStyle: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          textStyle: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -113,7 +118,10 @@ class UrbanEyeApp extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: primaryColor, width: 2),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
       ),
       cardTheme: CardTheme(
         elevation: 2,

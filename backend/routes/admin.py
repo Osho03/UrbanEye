@@ -16,9 +16,9 @@ except ImportError:
 admin_bp = Blueprint("admin", __name__)
 
 # Database connection
-client = MongoClient("mongodb://localhost:27017/")
-db = client["urbaneye"]
-issues_collection = db["issues"]
+from config import issues_collection, db
+autonomous_logs = db["autonomous_logs"]
+
 
 # Department mapping
 DEPARTMENT_MAPPING = {
@@ -43,26 +43,30 @@ def admin_login():
 @admin_bp.route("/issues", methods=["GET"])
 def get_all_issues_admin():
     # Get all issues with full details
-    issues = list(issues_collection.find({}))
-    
-    # Process issues
-    for issue in issues:
-        # Convert ObjectId to string for JSON serialization
-        if "_id" in issue:
-            issue["issue_id"] = str(issue["_id"])
-            del issue["_id"]
-            
-        # Add auto-assigned department if not present
-        if "assigned_department" not in issue:
-            issue["assigned_department"] = DEPARTMENT_MAPPING.get(
-                issue.get("issue_type"), 
-                "Unassigned"
-            )
-    
-    # Sort by timestamp (newest first)
-    issues.reverse()
-    
-    return jsonify(issues)
+    try:
+        issues = list(issues_collection.find({}))
+        
+        # Process issues
+        for issue in issues:
+            # Convert ObjectId to string for JSON serialization
+            if "_id" in issue:
+                issue["issue_id"] = str(issue["_id"])
+                del issue["_id"]
+                
+            # Add auto-assigned department if not present
+            if "assigned_department" not in issue:
+                issue["assigned_department"] = DEPARTMENT_MAPPING.get(
+                    issue.get("issue_type"), 
+                    "Unassigned"
+                )
+        
+        # Sort by timestamp (newest first)
+        issues.reverse()
+        
+        return jsonify(issues)
+    except Exception as e:
+        print(f"❌ Admin issues error: {e}")
+        return jsonify([]) # Return empty list on failure
 
 @admin_bp.route("/issues/<issue_id>", methods=["GET"])
 def get_issue_by_id(issue_id):
@@ -349,6 +353,62 @@ def generate_voice(issue_id):
         
     except Exception as e:
         print(f"❌ Voice generation error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+# ==================== PHASE 15: AUTONOMOUS AGENT CONTROL ====================
+
+@admin_bp.route("/autonomous/trigger", methods=["POST"])
+def trigger_autonomous_agent():
+    """Trigger the autonomous agent to process pending issues"""
+    try:
+        import subprocess
+        import sys
+        
+        # Path to autonomous_agent.py
+        agent_path = os.path.join(os.path.dirname(__file__), "..", "ai", "autonomous_agent.py")
+        
+        # Run as a one-shot process (not the loop)
+        # We'll pass a flag to tell it to run once and exit
+        python_exe = sys.executable or "python"
+        
+        # We'll actually just import and call the function for better control
+        from ai.autonomous_agent import process_pending_issues
+        count = process_pending_issues()
+        
+        # Log the action
+        autonomous_logs.insert_one({
+            "action": "Manual Trigger",
+            "timestamp": datetime.now(),
+            "issues_processed": count,
+            "triggered_by": "Admin"
+        })
+        
+        return jsonify({
+            "success": True, 
+            "message": f"Autonomous agent processed {count} issues.",
+            "count": count
+        })
+    except Exception as e:
+        print(f"❌ Autonomous trigger error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@admin_bp.route("/autonomous/status", methods=["GET"])
+def get_autonomous_status():
+    """Get status and history of autonomous agent"""
+    try:
+        logs = list(autonomous_logs.find().sort("timestamp", -1).limit(10))
+        for log in logs:
+            log["_id"] = str(log["_id"])
+            
+        # Get count of auto-processed issues
+        auto_count = issues_collection.count_documents({"autonomous_action": "Processed"})
+        
+        return jsonify({
+            "success": True,
+            "auto_processed_total": auto_count,
+            "recent_actions": logs
+        })
+    except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 

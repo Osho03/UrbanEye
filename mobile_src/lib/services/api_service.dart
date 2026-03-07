@@ -4,25 +4,48 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/issue_model.dart';
 
 class ApiService {
   // For Android emulator: 10.0.2.2 maps to host machine's localhost
   // For physical device: use your computer's local IP address
-  static String baseUrl = 'http://10.0.2.2:5000';
+  static String baseUrl = 'https://twenty-webs-fall.loca.lt';
+
+  /// Initialize URL from SharedPreferences
+  static Future<void> init() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedUrl = prefs.getString('backend_url');
+    if (savedUrl != null && savedUrl.isNotEmpty) {
+      baseUrl = savedUrl;
+    }
+  }
 
   /// Configure base URL (call from settings)
-  static void setBaseUrl(String url) {
+  static Future<void> setBaseUrl(String url) async {
     baseUrl = url;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('backend_url', url);
+  }
+
+  /// Helper for headers
+  static Map<String, String> _getHeaders({String? contentType}) {
+    final headers = <String, String>{'Bypass-Tunnel-Reminder': 'true'};
+    if (contentType != null) {
+      headers['Content-Type'] = contentType;
+    }
+    return headers;
   }
 
   // ==================== HEALTH ====================
-  
+
   static Future<bool> healthCheck() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/api/health'),
-      ).timeout(const Duration(seconds: 5));
+      final response = await http
+          .get(Uri.parse('$baseUrl/api/health'), headers: _getHeaders())
+          .timeout(
+            const Duration(seconds: 45),
+          ); // High timeout for Expo/Tunnels
       return response.statusCode == 200;
     } catch (e) {
       print('Health check failed: $e');
@@ -40,7 +63,7 @@ class ApiService {
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/user/register'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _getHeaders(contentType: 'application/json'),
       body: jsonEncode({
         'name': name,
         'email': email,
@@ -57,11 +80,8 @@ class ApiService {
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/user/login'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': email,
-        'password': password,
-      }),
+      headers: _getHeaders(contentType: 'application/json'),
+      body: jsonEncode({'email': email, 'password': password}),
     );
     return jsonDecode(response.body);
   }
@@ -69,6 +89,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getProfile(String userId) async {
     final response = await http.get(
       Uri.parse('$baseUrl/api/user/profile/$userId'),
+      headers: _getHeaders(),
     );
     return jsonDecode(response.body);
   }
@@ -84,7 +105,7 @@ class ApiService {
 
     final response = await http.put(
       Uri.parse('$baseUrl/api/user/profile/$userId'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _getHeaders(contentType: 'application/json'),
       body: jsonEncode(body),
     );
     return jsonDecode(response.body);
@@ -106,6 +127,7 @@ class ApiService {
   }) async {
     final uri = Uri.parse('$baseUrl/api/issues/report');
     final request = http.MultipartRequest('POST', uri);
+    request.headers.addAll(_getHeaders());
 
     // Add image file
     final mimeType = lookupMimeType(imageFile.path) ?? 'image/jpeg';
@@ -126,7 +148,8 @@ class ApiService {
     request.fields['address'] = address ?? 'Unknown Location';
     request.fields['reported_by'] = reportedBy;
     if (reporterEmail != null) request.fields['reporter_email'] = reporterEmail;
-    if (voiceTranscript != null) request.fields['voice_transcript'] = voiceTranscript;
+    if (voiceTranscript != null)
+      request.fields['voice_transcript'] = voiceTranscript;
 
     final streamedResponse = await request.send();
     final response = await http.Response.fromStream(streamedResponse);
@@ -137,11 +160,14 @@ class ApiService {
   static Future<List<Issue>> getAllIssues() async {
     final response = await http.get(
       Uri.parse('$baseUrl/api/issues/all'),
+      headers: _getHeaders(),
     );
-    
+
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
-      return data.map((json) => Issue.fromJson(json as Map<String, dynamic>)).toList();
+      return data
+          .map((json) => Issue.fromJson(json as Map<String, dynamic>))
+          .toList();
     }
     return [];
   }
@@ -150,13 +176,16 @@ class ApiService {
   static Future<List<Issue>> getUserReports(String userId) async {
     final response = await http.get(
       Uri.parse('$baseUrl/api/user/reports/$userId'),
+      headers: _getHeaders(),
     );
-    
+
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       if (data['success'] == true) {
         final List<dynamic> issues = data['issues'];
-        return issues.map((json) => Issue.fromJson(json as Map<String, dynamic>)).toList();
+        return issues
+            .map((json) => Issue.fromJson(json as Map<String, dynamic>))
+            .toList();
       }
     }
     return [];
@@ -167,6 +196,7 @@ class ApiService {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/api/issues/$issueId/status'),
+        headers: _getHeaders(),
       );
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -183,6 +213,7 @@ class ApiService {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/api/analytics/stats'),
+        headers: _getHeaders(),
       );
       if (response.statusCode == 200) {
         return jsonDecode(response.body);

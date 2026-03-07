@@ -47,4 +47,11 @@ coverage/
 .vscode/
 *.swp
 *.swo
-.DS_Store
+
+# Large files / uploads
+backend/uploads/
+*.pt
+*.h5
+*.model
+*.pkl
+backend/data/db/

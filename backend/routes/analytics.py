@@ -51,6 +51,7 @@ def get_statistics():
             "pending": pending,
             "assigned": assigned,
             "resolved": resolved,
+            "autonomous": issues_collection.count_documents({"autonomous_action": "Processed"}),
             "by_type": type_counts,
             "by_dept": dept_counts,
             "by_severity": severity_counts
