@@ -2,7 +2,11 @@ import os
 from flask import Blueprint, request, jsonify
 from config import issues_collection
 from datetime import datetime
-from ai.image_classifier import classify_issue
+try:
+    from ai.image_classifier import classify_issue
+except Exception as e:
+    print(f"⚠️ image_classifier not available: {e}")
+    def classify_issue(path): return "unknown"
 from routes.routing import get_routing_info
 
 issue_bp = Blueprint("issue", __name__)

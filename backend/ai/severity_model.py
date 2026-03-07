@@ -1,5 +1,10 @@
-import cv2
-import numpy as np
+try:
+    import cv2
+    import numpy as np
+    CV2_AVAILABLE = True
+except ImportError:
+    CV2_AVAILABLE = False
+
 
 def estimate_severity(image_path, issue_type):
     """

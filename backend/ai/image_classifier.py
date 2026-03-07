@@ -14,8 +14,12 @@ Two-Phase System:
 - Training (train_model.py): Offline fine-tuning on verified data
 """
 
-import cv2
-import numpy as np
+try:
+    import cv2
+    import numpy as np
+    CV2_AVAILABLE = True
+except ImportError:
+    CV2_AVAILABLE = False
 import json
 import os
 

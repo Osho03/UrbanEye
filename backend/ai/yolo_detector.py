@@ -1,12 +1,31 @@
-import cv2
+try:
+    import cv2
+    CV2_AVAILABLE = True
+except ImportError:
+    CV2_AVAILABLE = False
+
+try:
+    from ultralytics import YOLO
+    YOLO_AVAILABLE = True
+except ImportError:
+    YOLO_AVAILABLE = False
+
 import os
 import json
-from ultralytics import YOLO
 
-# Load YOLOv8 Nano model (pretrained on COCO)
-# In production, this would be fine-tuned on civic infrastructure data
+# Load YOLOv8 Nano model lazily - skip on cloud if not available
 MODEL_PATH = "yolov8n.pt"
-model = YOLO(MODEL_PATH)
+model = None
+
+def _get_model():
+    global model
+    if model is None and YOLO_AVAILABLE and os.path.exists(MODEL_PATH):
+        try:
+            model = YOLO(MODEL_PATH)
+        except Exception as e:
+            print(f"⚠️ Could not load YOLO model: {e}")
+    return model
+
 
 def detect_issue(image_path):
     """
@@ -19,8 +38,11 @@ def detect_issue(image_path):
     Returns:
         dict: Detection results including issue_type, bounding_box, area, severity, and cost.
     """
+    yolo_model = _get_model()
+    if not yolo_model:
+        return None  # YOLO not available on this server
     try:
-        results = model.predict(image_path, conf=0.25)
+        results = yolo_model.predict(image_path, conf=0.25)
         
         if not results or len(results[0].boxes) == 0:
             return None
