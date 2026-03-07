@@ -18,19 +18,35 @@ import '../models/issue_model.dart';
 class ApiService {
   static String baseUrl = kIsWeb
       ? 'http://localhost:5000'
-      : 'https://urbaneye-backend-kzb6.onrender.com';
+      : 'https://quick-toys-cheer.loca.lt'; // Updated for Expo reliability
 
   /// Configure base URL (call from settings)
   static void setBaseUrl(String url) {
     baseUrl = url;
   }
 
+  /// Helper for headers
+  static Map<String, String> _getHeaders({String? contentType}) {
+    final headers = <String, String>{
+      'Bypass-Tunnel-Reminder': 'true',
+    };
+    if (contentType != null) {
+      headers['Content-Type'] = contentType;
+    }
+    return headers;
+  }
+
   // ==================== HEALTH ====================
 
   static Future<bool> healthCheck() async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/api/health')).timeout(
-          const Duration(seconds: 45)); // High timeout for Render cold starts
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/api/health'),
+            headers: _getHeaders(),
+          )
+          .timeout(const Duration(
+              seconds: 45)); // High timeout for Render cold starts
 
       final isOk = response.statusCode == 200;
       if (!isOk) {
@@ -53,7 +69,7 @@ class ApiService {
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/user/register'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _getHeaders(contentType: 'application/json'),
       body: jsonEncode({
         'name': name,
         'email': email,
@@ -70,7 +86,7 @@ class ApiService {
   }) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/user/login'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _getHeaders(contentType: 'application/json'),
       body: jsonEncode({
         'email': email,
         'password': password,
@@ -82,6 +98,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getProfile(String userId) async {
     final response = await http.get(
       Uri.parse('$baseUrl/api/user/profile/$userId'),
+      headers: _getHeaders(),
     );
     return jsonDecode(response.body);
   }
@@ -97,7 +114,7 @@ class ApiService {
 
     final response = await http.put(
       Uri.parse('$baseUrl/api/user/profile/$userId'),
-      headers: {'Content-Type': 'application/json'},
+      headers: _getHeaders(contentType: 'application/json'),
       body: jsonEncode(body),
     );
     return jsonDecode(response.body);
@@ -122,6 +139,7 @@ class ApiService {
   }) async {
     final uri = Uri.parse('$baseUrl/api/issues/report');
     final request = http.MultipartRequest('POST', uri);
+    request.headers.addAll(_getHeaders());
 
     // Image as multipart/form-data
     final mimeType = lookupMimeType(fileName) ?? 'image/jpeg';
@@ -156,6 +174,7 @@ class ApiService {
   static Future<List<Issue>> getAllIssues() async {
     final response = await http.get(
       Uri.parse('$baseUrl/api/issues/all'),
+      headers: _getHeaders(),
     );
 
     if (response.statusCode == 200) {
@@ -171,6 +190,7 @@ class ApiService {
   static Future<List<Issue>> getUserReports(String userId) async {
     final response = await http.get(
       Uri.parse('$baseUrl/api/user/reports/$userId'),
+      headers: _getHeaders(),
     );
 
     if (response.statusCode == 200) {
@@ -190,6 +210,7 @@ class ApiService {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/api/issues/$issueId/status'),
+        headers: _getHeaders(),
       );
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -207,7 +228,10 @@ class ApiService {
   static Future<Map<String, dynamic>> getAISummary(String issueId) async {
     try {
       final response = await http
-          .get(Uri.parse('$baseUrl/api/issues/$issueId/ai-summary'))
+          .get(
+            Uri.parse('$baseUrl/api/issues/$issueId/ai-summary'),
+            headers: _getHeaders(),
+          )
           .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
@@ -224,7 +248,10 @@ class ApiService {
   static Future<List<dynamic>> getHotspots() async {
     try {
       final response = await http
-          .get(Uri.parse('$baseUrl/api/analytics/hotspots'))
+          .get(
+            Uri.parse('$baseUrl/api/analytics/hotspots'),
+            headers: _getHeaders(),
+          )
           .timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
@@ -242,6 +269,7 @@ class ApiService {
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/api/analytics/stats'),
+        headers: _getHeaders(),
       );
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -276,7 +304,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/api/chatbot/message'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _getHeaders(contentType: 'application/json'),
         body: jsonEncode({
           'user_id': userId,
           'message': message,
@@ -291,7 +319,10 @@ class ApiService {
   /// Clear chatbot conversation
   static Future<void> clearChat(String userId) async {
     try {
-      await http.post(Uri.parse('$baseUrl/api/chatbot/clear/$userId'));
+      await http.post(
+        Uri.parse('$baseUrl/api/chatbot/clear/$userId'),
+        headers: _getHeaders(),
+      );
     } catch (e) {
       print('Clear chat error: $e');
     }
