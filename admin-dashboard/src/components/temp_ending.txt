@@ -1,0 +1,10 @@
+﻿            )}
+
+            {/* Phase 10: AI Auto-Resolution Engine */}
+            <AIRecommendation issueId={id} />
+
+        </div>
+    );
+};
+
+export default IssueDetail;

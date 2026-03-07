@@ -1,0 +1,244 @@
+/* Admin Dashboard Styles */
+:root {
+  --primary-color: #1a202c;
+  /* Dark Slate */
+  --secondary-color: #2b6cb0;
+  /* Blue */
+  --accent-color: #48bb78;
+  /* Green */
+  --danger-color: #f56565;
+  /* Red */
+  --bg-color: #f7fafc;
+  --text-color: #2d3748;
+  --sidebar-width: 250px;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.admin-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--primary-color);
+  color: white;
+  padding: 2rem 1rem;
+  position: fixed;
+  height: 100vh;
+  left: 0;
+  top: 0;
+}
+
+.sidebar h2 {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  padding-left: 1rem;
+  border-left: 4px solid var(--secondary-color);
+}
+
+.nav-link {
+  display: block;
+  padding: 1rem;
+  color: #a0aec0;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background-color: #2d3748;
+  color: white;
+  transform: translateX(5px);
+}
+
+.logout-btn {
+  margin-top: auto;
+  background: #c53030;
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  width: 100%;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* Main Content */
+.main-content {
+  margin-left: var(--sidebar-width);
+  padding: 2rem;
+  width: calc(100% - var(--sidebar-width));
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+}
+
+/* Data Table */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.data-table th {
+  background-color: #edf2f7;
+  color: #4a5568;
+  font-weight: 600;
+}
+
+.data-table tr:hover {
+  background-color: #f7fafc;
+}
+
+/* Badges */
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.badge-pending {
+  background: #feebc8;
+  color: #c05621;
+}
+
+.badge-assigned {
+  background: #bee3f8;
+  color: #2b6cb0;
+}
+
+.badge-resolved {
+  background: #c6f6d5;
+  color: #2f855a;
+}
+
+.badge-high {
+  background: #fed7d7;
+  color: #c53030;
+}
+
+.badge-medium {
+  background: #feebc8;
+  color: #c05621;
+}
+
+.badge-low {
+  background: #c6f6d5;
+  color: #2f855a;
+}
+
+/* Login Page */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: var(--primary-color);
+}
+
+.login-box {
+  background: white;
+  padding: 3rem;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.login-form input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 1rem;
+  background: var(--secondary-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Issue Detail */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.detail-image {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.action-bar {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background: var(--secondary-color);
+  color: white;
+}
+
+.btn-success {
+  background: var(--accent-color);
+  color: white;
+}
+
+.btn-danger {
+  background: var(--danger-color);
+  color: white;
+}

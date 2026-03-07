@@ -1,0 +1,440 @@
+/* ==================== GLASSMORPHISM AI RECOMMENDATION PANEL ==================== */
+
+.ai-recommendation-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 30px;
+    margin: 30px 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-recommendation-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background-size: 200% 100%;
+    animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ai-recommendation-card.loading,
+.ai-recommendation-card.error {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    color: #333;
+}
+
+.ai-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.ai-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.collapse-btn {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #333;
+    font-size: 1.5rem;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.collapse-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+.disclaimer {
+    background: rgba(99, 102, 241, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    border-left: 4px solid #667eea;
+    color: #333;
+}
+
+/* Confidence Meter */
+.confidence-section {
+    margin: 25px 0;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.confidence-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-weight: 600;
+    color: #333;
+}
+
+.confidence-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.confidence-bar {
+    background: rgba(0, 0, 0, 0.1);
+    height: 24px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.confidence-fill {
+    height: 100%;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.confidence-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.confidence-fill.critical {
+    background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.confidence-fill.moderate {
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.confidence-fill.low {
+    background: linear-gradient(90deg, #10b981, #059669);
+}
+
+/* Recommendation Section */
+.recommendation-section,
+.contractor-section,
+.reasoning-section {
+    margin: 25px 0;
+}
+
+.recommendation-section h4,
+.contractor-section h4,
+.reasoning-section h4 {
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.recommendation-box {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.recommendation-item {
+    margin: 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #333;
+    font-size: 1rem;
+}
+
+.priority-badge {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.priority-badge.high {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.priority-badge.medium {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.priority-badge.low {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+/* Contractor Cards */
+.contractor-card {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    padding: 18px;
+    border-radius: 16px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: all 0.3s ease;
+}
+
+.contractor-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.contractor-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.contractor-rank {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.contractor-name {
+    flex: 1;
+    font-weight: 600;
+    color: #333;
+    font-size: 1.05rem;
+}
+
+.contractor-rating {
+    color: #fbbf24;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.contractor-details {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    margin: 8px 0;
+    color: #555;
+}
+
+.contractor-contact {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 8px;
+    text-decoration: none;
+    color: #667eea;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.contact-link:hover {
+    background: rgba(102, 126, 234, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.available {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.busy {
+    color: #f59e0b;
+    font-weight: 600;
+}
+
+.contractor-suitability {
+    font-size: 0.9rem;
+    color: #667eea;
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+/* Reasoning List */
+.reasoning-list {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    padding: 20px 20px 20px 40px;
+    border-radius: 16px;
+    margin: 0;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.reasoning-list li {
+    margin: 10px 0;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Score Breakdown */
+.score-breakdown {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    border-radius: 16px;
+    margin: 20px 0;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: all 0.3s ease;
+}
+
+.score-breakdown:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.score-breakdown summary {
+    font-weight: 600;
+    cursor: pointer;
+    color: #333;
+}
+
+.breakdown-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 15px;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.action-buttons button {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.action-buttons button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-accept {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.btn-modify {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.btn-reject {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.error-message {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 4px solid #ef4444;
+}

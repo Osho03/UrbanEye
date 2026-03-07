@@ -1,0 +1,6 @@
+/* Global styles handled in Dashboard components */
+body {
+  margin: 0;
+  background-color: #f7fafc;
+  /* Light background for dashboard */
+}
