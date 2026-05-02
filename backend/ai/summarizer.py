@@ -207,5 +207,5 @@ Return JSON with:
             
         return briefing.strip()
 
-# Initialize global summarizer
-summarizer = IssueSummarizer()
+# Initialize global summarizer (Commented out to prevent startup crashes)
+# summarizer = IssueSummarizer()

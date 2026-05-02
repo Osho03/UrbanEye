@@ -7,12 +7,20 @@ from flask import Blueprint, request, jsonify
 from datetime import datetime
 import uuid
 
-# Import the chatbot engine
-try:
-    from ai.chatbot_engine import chatbot
-except ImportError:
-    print("⚠️  Chatbot engine not available - install openai: pip install openai")
-    chatbot = None
+# Global chatbot instance for lazy loading
+chatbot = None
+
+def get_chatbot():
+    """Lazy initialize the chatbot engine"""
+    global chatbot
+    if chatbot is None:
+        try:
+            from ai.chatbot_engine import UrbanEyeChatbot
+            chatbot = UrbanEyeChatbot()
+        except Exception as e:
+            print(f"❌ Error initializing chatbot engine: {e}")
+            chatbot = "ERROR" # Marker to prevent repeated failing attempts
+    return chatbot
 
 bp = Blueprint('chatbot', __name__, url_prefix='/api/chatbot')
 
@@ -20,20 +28,9 @@ bp = Blueprint('chatbot', __name__, url_prefix='/api/chatbot')
 def send_message():
     """
     Send message to chatbot and get response
-    
-    POST /api/chatbot/message
-    Body: {
-        "user_id": "optional-user-id",
-        "message": "How do I report a pothole?"
-    }
-    
-    Response: {
-        "user_message": "...",
-        "bot_response": "...",
-        "timestamp": "..."
-    }
     """
-    if not chatbot:
+    bot = get_chatbot()
+    if bot is None or bot == "ERROR":
         return jsonify({"error": "Chatbot not available. Please configure OpenAI API key."}), 503
     
     data = request.json
@@ -49,7 +46,7 @@ def send_message():
     
     try:
         # Get bot response
-        bot_response = chatbot.chat(user_id, message)
+        bot_response = bot.chat(user_id, message)
         
         return jsonify({
             "success": True,
@@ -74,10 +71,11 @@ def clear_conversation(user_id):
     
     POST /api/chatbot/clear/<user_id>
     """
-    if not chatbot:
+    bot = get_chatbot()
+    if bot is None or bot == "ERROR":
         return jsonify({"error": "Chatbot not available"}), 503
     
-    success = chatbot.clear_conversation(user_id)
+    success = bot.clear_conversation(user_id)
     
     if success:
         return jsonify({
@@ -98,10 +96,11 @@ def get_quick_replies():
     
     GET /api/chatbot/quick-replies
     """
-    if not chatbot:
+    bot = get_chatbot()
+    if bot is None or bot == "ERROR":
         return jsonify({"quick_replies": []}), 503
     
-    quick_replies = chatbot.get_quick_replies()
+    quick_replies = bot.get_quick_replies()
     
     return jsonify({
         "quick_replies": quick_replies
@@ -115,8 +114,10 @@ def health_check():
     
     GET /api/chatbot/health
     """
+    bot = get_chatbot()
+    is_avail = bot is not None and bot != "ERROR"
     return jsonify({
         "service": "chatbot",
-        "status": "available" if chatbot else "unavailable",
-        "message": "Chatbot ready" if chatbot else "OpenAI API key not configured"
+        "status": "available" if is_avail else "unavailable",
+        "message": "Chatbot ready" if is_avail else "Chatbot engine initialization failed"
     })

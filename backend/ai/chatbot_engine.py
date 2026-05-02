@@ -184,5 +184,5 @@ UrbanEye helps citizens report infrastructure problems to the government using A
             "Do I need login?"
         ]
 
-# Initialize global chatbot instance
-chatbot = UrbanEyeChatbot()
+# Initialize global chatbot instance (Commented out to prevent startup crashes)
+# chatbot = UrbanEyeChatbot()
