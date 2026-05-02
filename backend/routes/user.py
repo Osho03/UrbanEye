@@ -270,7 +270,7 @@ def get_user_impact(user_id):
     try:
         user = users_collection.find_one({"_id": ObjectId(user_id)})
         if not user:
-             return jsonify({"success": False, "message": "User not found"}), 404
+            return jsonify({"success": False, "message": "User not found"}), 404
 
         # Find all reports by this user to calculate impact
         reports = list(issues_collection.find({
@@ -296,4 +296,4 @@ def get_user_impact(user_id):
             "reports_count": len(reports)
         })
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+        return jsonify({"success": False, "message": str(e)}), 500
