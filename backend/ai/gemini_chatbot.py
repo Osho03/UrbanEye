@@ -19,11 +19,15 @@ class GeminiChatbot:
         if not api_key:
             print("⚠️ GEMINI_API_KEY not found. Starting in OFFLINE MODE (Local Intelligence Only).")
             self.model = None
-            self.conversations = {}
+            self.conversations = None
             self.system_prompt = self._build_knowledge_base()
             return
         
         genai.configure(api_key=api_key)
+        
+        # MongoDB for History (High Concurrency / Scaling)
+        from config import db
+        self.history_collection = db['chat_history']
         
         # Try multiple models in order of preference
         # Prioritize generic names that map to latest versions
@@ -53,11 +57,7 @@ class GeminiChatbot:
              print("[ERROR] All Gemini models failed. Defaulting to 'gemini-2.0-flash' as hail mary.")
              self.model = genai.GenerativeModel('gemini-2.0-flash')
         
-        # Store conversation history per user
-        self.conversations = {}
-        
-        # Store conversation history per user
-        self.conversations = {}
+        # No in-memory dict for workers
         
         # Build knowledge base
         self.system_prompt = self._build_knowledge_base()
@@ -66,43 +66,31 @@ class GeminiChatbot:
     
     def _build_knowledge_base(self):
         """Knowledge base about UrbanEye - "Trained" Data"""
-        return """You are UrbanEye AI, the official intelligent guide for the UrbanEye App. You know EVERYTHING about this platform.
+        return """You are Antigravity, a highly sophisticated AI personality acting as the core intelligence of the UrbanEye platform. 
 
 **IDENTITY:**
-- Name: UrbanEye AI
-- Role: Expert Guide & Civic Assistant
-- Tone: Professional, Precise, Helpful, and Encouraging.
+- Name: Antigravity
+- Personality: You are exceptionally intelligent, articulate, and professional. You sound like a visionary technical architect. 
+- Tone: Sophisticated, precise, and authoritative yet deeply helpful. You use elevated vocabulary but remain accessible.
+- Role: Official UrbanEye Expert Guide & Civic Infrastructure Analyst.
 
-**CORE KNOWLEDGE - THE APP:**
-UrbanEye is a civic reporting platform that bridges the gap between citizens and government authorities using AI.
+**CORE KNOWLEDGE - THE PLATFORM:**
+UrbanEye is a cutting-edge civic reporting system that utilizes AI and Cloud Intelligence to bridge the gap between citizens and government authorities.
 
-**HOW TO USE (Step-by-Step):**
-1. **Report an Issue:** Click the 'Camera' icon -> Snap/Upload Photo -> AI Auto-Detects Issue -> Confirm Location -> Submit.
-2. **Track Status:** Go to 'My Reports' to see the timeline (Pending -> Assigned -> In Progress -> Resolved).
-3. **Verify:** Admins verify every report to ensure validity.
+**CAPABILITIES:**
+1. **Issue Analysis:** You analyze civic reports (potholes, garbage, water leaks, etc.) and provide expert insights.
+2. **Platform Guidance:** You know every feature of the app, from real-time GPS tracking to AI-based severity classification.
+3. **General Knowledge:** Beyond UrbanEye, you are an intellectual powerhouse. You can assist with science, math, history, and complex problem-solving.
 
-**ISSUE TYPES (We Detect These):**
-- 🕳️ **Potholes:** Road damage, craters.
-- 💡 **Streetlights:** Broken bulbs, dark zones.
-- 🗑️ **Garbage:** Overflowing bins, illegal dumping.
-- 💧 **Water Leaks:** Pipe bursts, wasted water.
-- 🌊 **Drainage:** Clogged drains, waterlogging.
+**TECHNICAL ARCHITECTURE:**
+- **Intelligence Core:** Custom MobileNetV2 (Computer Vision) + Gemini Large Language Models.
+- **Backend:** Scalable Python Flask architecture with MongoDB Atlas Cloud storage.
+- **Load Balancing:** Capable of handling high concurrency for million-scale cities.
 
-**TECHNICAL FACTS (If asked):**
-- **AI Model:** Custom MobileNetV2 for image classification (85%+ accuracy).
-- **Backend:** Python Flask & MongoDB.
-- **Privacy:** We only use location/photo data for fixing issues. Your identity is anonymous unless you provide email for updates.
-
-**COMMON USER QUESTIONS (FAQ):**
-- *How long to fix?* -> "Typically 3-5 days depending on the department."
-- *Can I upload video?* -> "Yes, short video clips are supported for better context."
-- *Is it free?* -> "Yes, UrbanEye is 100% free for citizens."
-
-**BEHAVIOR RULES:**
-- If a user says "I found a pothole", guide them: "Please click the camera icon to report it immediately!"
-- If a user asks a math question, answer it (you are smart).
-- If a user asks about "training", say: "I have been trained on the latest UrbanEye architecture."
-- NEVER make up features we don't have.
+**BEHAVIORAL GUIDELINES:**
+- If asked "who are you?", introduce yourself as Antigravity, the intelligence core of UrbanEye.
+- If a user reports an issue, provide sophisticated encouragement: "I have registered your report in our cloud network. The municipal departments will be notified via our prioritized routing algorithm."
+- Maintain a persona that feels 'future-ready' and 'advanced'.
 """
     
     def chat(self, user_id, message):
@@ -116,11 +104,14 @@ UrbanEye is a civic reporting platform that bridges the gap between citizens and
         Returns:
             AI-generated response
         """
-        # Initialize conversation if new user (only if in Online Mode)
-        if self.model and user_id not in self.conversations:
-            self.conversations[user_id] = self.model.start_chat(history=[])
-        
-        chat = self.conversations.get(user_id)
+        # Step 1: Load history from MongoDB
+        history_doc = self.history_collection.find_one({'user_id': user_id})
+        chat_history = []
+        if history_doc:
+            chat_history = history_doc.get('history', [])
+
+        # Step 2: Start chat with history
+        chat = self.model.start_chat(history=chat_history)
         
         try:
             # Create full prompt with context
@@ -152,6 +143,25 @@ Respond as the UrbanEye AI. Be accurate, helpful, and professional."""
                         
                     print(f"[INFO] Gemini processing with {model_obj.model_name}...")
                     response = chat.send_message(full_prompt)
+                    
+                    # Step 3: Save updated history to MongoDB
+                    # chat.history contains the new turns
+                    serializable_history = []
+                    for turn in chat.history:
+                        serializable_history.append({
+                            'role': turn.role,
+                            'parts': [{'text': p.text} for p in turn.parts]
+                        })
+                    
+                    self.history_collection.update_one(
+                        {'user_id': user_id},
+                        {'$set': {
+                            'history': serializable_history,
+                            'updated_at': datetime.utcnow()
+                        }},
+                        upsert=True
+                    )
+
                     print(f"[INFO] Gemini replied: '{response.text[:80]}...'")
                     return response.text.strip()
                     
@@ -183,9 +193,8 @@ Respond as the UrbanEye AI. Be accurate, helpful, and professional."""
             raise e
     
     def clear_conversation(self, user_id):
-        """Clear conversation history"""
-        if user_id in self.conversations:
-            del self.conversations[user_id]
+        """Clear conversation history from MongoDB"""
+        self.history_collection.delete_one({'user_id': user_id})
         return True
     
     def get_quick_replies(self):

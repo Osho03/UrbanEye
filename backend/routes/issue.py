@@ -5,7 +5,7 @@ from datetime import datetime
 try:
     from ai.image_classifier import classify_issue
 except Exception as e:
-    print(f"⚠️ image_classifier not available: {e}")
+    print(f"Warning: image_classifier not available: {e}")
     def classify_issue(path): return "unknown"
 from routes.routing import get_routing_info
 

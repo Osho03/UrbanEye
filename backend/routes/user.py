@@ -8,12 +8,11 @@ from datetime import datetime
 from bson import ObjectId
 import hashlib
 import uuid
+import os
 
 user_bp = Blueprint("user", __name__)
 
-# Database connection
-client = MongoClient("mongodb://localhost:27017/")
-db = client["urbaneye"]
+from config import db
 users_collection = db["users"]
 issues_collection = db["issues"]
 
@@ -93,8 +92,93 @@ def login():
             "email": user["email"],
             "phone": user.get("phone", ""),
             "role": user.get("role", "citizen"),
-            "token": new_token
+            "token": new_token,
+            "profile_photo": user.get("profile_photo")
         }
+    })
+
+@user_bp.route("/google-login", methods=["POST"])
+def google_login():
+    """Simulated Google One-Tap Login"""
+    data = request.json
+    email = data.get("email", "").strip().lower()
+    name = data.get("name", "").strip()
+    profile_photo = data.get("profile_photo", "")
+
+    if not email or not name:
+        return jsonify({"success": False, "message": "Email and name required"}), 400
+
+    user = users_collection.find_one({"email": email})
+    
+    if not user:
+        # Create new user automatically from Google data
+        user = {
+            "name": name,
+            "email": email,
+            "profile_photo": profile_photo,
+            "role": "citizen",
+            "auth_type": "google",
+            "created_at": datetime.now(),
+            "token": str(uuid.uuid4())
+        }
+        result = users_collection.insert_one(user)
+        user["_id"] = result.inserted_id
+    else:
+        # Update existing user with latest Google info
+        new_token = str(uuid.uuid4())
+        users_collection.update_one(
+            {"_id": user["_id"]},
+            {"$set": {
+                "name": name,
+                "profile_photo": profile_photo if profile_photo else user.get("profile_photo"),
+                "token": new_token,
+                "last_login": datetime.now()
+            }}
+        )
+        user["token"] = new_token
+
+    return jsonify({
+        "success": True,
+        "message": "Google Login successful",
+        "user": {
+            "user_id": str(user["_id"]),
+            "name": name,
+            "email": email,
+            "profile_photo": user.get("profile_photo"),
+            "role": user.get("role", "citizen"),
+            "token": user["token"]
+        }
+    })
+
+@user_bp.route("/profile-photo/<user_id>", methods=["POST"])
+def upload_profile_photo(user_id):
+    """Upload or update profile photo"""
+    if 'image' not in request.files:
+        return jsonify({"success": False, "message": "No image provided"}), 400
+    
+    image = request.files['image']
+    if image.filename == '':
+        return jsonify({"success": False, "message": "Empty filename"}), 400
+
+    # Save image
+    upload_dir = os.path.join("uploads", "profiles")
+    os.makedirs(upload_dir, exist_ok=True)
+    
+    filename = f"profile_{user_id}_{int(datetime.now().timestamp())}.jpg"
+    filepath = os.path.join(upload_dir, filename)
+    image.save(filepath)
+
+    # Update DB
+    photo_url = f"uploads/profiles/{filename}"
+    users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"profile_photo": photo_url}}
+    )
+
+    return jsonify({
+        "success": True,
+        "message": "Profile photo updated",
+        "photo_url": photo_url
     })
 
 @user_bp.route("/profile/<user_id>", methods=["GET"])

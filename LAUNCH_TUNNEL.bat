@@ -4,8 +4,8 @@ title UrbanEye Tunnel Monitor
 echo ==============================================
 echo [EXPO] Starting Public Tunnel...
 echo ==============================================
-cd /d d:\UrbanEye\backend
-npx localtunnel --port 5000
+cd /d %~dp0backend
+npx.cmd localtunnel --port 5000 --subdomain urbaneye-backend-v1
 echo.
 echo ⚠️ TUNNEL CRASHED or CLOSED! 
 echo Restarting in 5 seconds (Press Ctrl+C to stop)...

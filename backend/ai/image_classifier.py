@@ -27,6 +27,9 @@ import os
 LABELS_PATH = os.path.join(os.path.dirname(__file__), "labels.json")
 TRAINED_MODEL_PATH = os.path.join(os.path.dirname(__file__), "urbaneye_finetuned_model.h5")
 
+import google.generativeai as genai
+from PIL import Image
+
 # Load labels
 with open(LABELS_PATH) as f:
     LABELS = json.load(f)
@@ -35,18 +38,62 @@ model = None
 # Check if fine-tuned model exists (Lazy Check)
 USING_FINETUNED = os.path.exists(TRAINED_MODEL_PATH)
 
+def _classify_with_gemini(image_path):
+    """Universal Object Detection using Gemini Vision"""
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        return None
+        
+    try:
+        genai.configure(api_key=api_key)
+        # Use flash for speed
+        vision_model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        img = Image.open(image_path)
+        
+        prompt = """
+        Analyze this image for UrbanEye Civic Intelligence.
+        Identify the main object or issue in the image.
+        If it is a civic issue (pothole, garbage, etc.), name it.
+        If it is a general object (laptop, car, etc.), name it accurately.
+        
+        Return ONLY a JSON object with:
+        {
+            "detected_object": "name of object",
+            "is_civic_issue": true/false,
+            "confidence": 0.0 to 1.0,
+            "brief_description": "short description"
+        }
+        """
+        
+        response = vision_model.generate_content([prompt, img])
+        # Clean response text (remove markdown if any)
+        text = response.text.replace('```json', '').replace('```', '').strip()
+        return json.loads(text)
+    except Exception as e:
+        print(f"⚠️ Gemini Vision Error: {e}")
+        return None
+
 
 
 def classify_issue(image_path):
     """
-    Classify civic issue type using computer vision.
-    
-    Args:
-        image_path (str): Path to the uploaded image file
-        
-    Returns:
-        str: Issue type (pothole, garbage, water_leak, streetlight, unknown)
+    Classify ANYTHING using Super-Intelligent Vision.
+    Falls back to local MobileNet if Gemini is offline.
     """
+    # Step 1: Try Super-Intelligent Gemini Vision (Universal Detection)
+    gemini_result = _classify_with_gemini(image_path)
+    if gemini_result:
+        print(f"🌟 Super AI Detected: {gemini_result['detected_object']}")
+        return {
+            "status": "confident",
+            "detected_type": gemini_result['detected_object'],
+            "confidence": round(gemini_result['confidence'] * 100, 1),
+            "is_universal": True,
+            "description": gemini_result['brief_description']
+        }
+
+    # Step 2: Fallback to Local Classifier
     global model
     
     # Lazy Import TensorFlow

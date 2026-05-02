@@ -18,7 +18,7 @@ import '../models/issue_model.dart';
 class ApiService {
   static String baseUrl = kIsWeb
       ? 'http://localhost:5000'
-      : 'https://quick-toys-cheer.loca.lt'; // Updated for Expo reliability
+      : 'http://192.168.1.3:5000'; // Using local Wi-Fi IP to avoid 503 errors
 
   /// Configure base URL (call from settings)
   static void setBaseUrl(String url) {
@@ -95,6 +95,23 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
+  static Future<Map<String, dynamic>> googleLogin({
+    required String name,
+    required String email,
+    String? profilePhoto,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/user/google-login'),
+      headers: _getHeaders(contentType: 'application/json'),
+      body: jsonEncode({
+        'name': name,
+        'email': email,
+        'profile_photo': profilePhoto ?? '',
+      }),
+    );
+    return jsonDecode(response.body);
+  }
+
   static Future<Map<String, dynamic>> getProfile(String userId) async {
     final response = await http.get(
       Uri.parse('$baseUrl/api/user/profile/$userId'),
@@ -118,6 +135,48 @@ class ApiService {
       body: jsonEncode(body),
     );
     return jsonDecode(response.body);
+  }
+
+  static Future<Map<String, dynamic>> updateProfilePhoto(
+    String userId,
+    Uint8List imageBytes,
+    String fileName,
+  ) async {
+    final uri = Uri.parse('$baseUrl/api/user/profile-photo/$userId');
+    final request = http.MultipartRequest('POST', uri);
+    request.headers.addAll(_getHeaders());
+
+    final mimeType = lookupMimeType(fileName) ?? 'image/jpeg';
+    final mimeTypeParts = mimeType.split('/');
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        'image',
+        imageBytes,
+        filename: fileName,
+        contentType: MediaType(mimeTypeParts[0], mimeTypeParts[1]),
+      ),
+    );
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+    return jsonDecode(response.body);
+  }
+
+  // ==================== IMPACT ====================
+
+  static Future<Map<String, dynamic>> getUserImpact(String userId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/user/impact/$userId'),
+        headers: _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+    } catch (e) {
+      print('Error getting impact: $e');
+    }
+    return {'total_impact': 0, 'rank': 'Bronze Citizen'};
   }
 
   // ==================== ISSUES ====================

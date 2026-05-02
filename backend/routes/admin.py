@@ -9,7 +9,7 @@ try:
     from ai.summarizer import summarizer
     from ai.text_to_speech import voice_synth
 except ImportError:
-    print("⚠️  AI modules not available")
+    print("Warning: AI modules not available")
     summarizer = None
     voice_synth = None
 
@@ -36,8 +36,8 @@ def admin_login():
     username = data.get("username")
     password = data.get("password")
     
-    if username == "admin" and password == "admin123":
-        return jsonify({"success": True, "token": "admin-token", "user": {"username": "admin", "role": "admin"}})
+    if username == "osho" and password == "osho@2006":
+        return jsonify({"success": True, "token": "admin-token", "user": {"username": "osho", "role": "admin"}})
     return jsonify({"success": False, "message": "Invalid credentials"}), 401
 
 @admin_bp.route("/issues", methods=["GET"])

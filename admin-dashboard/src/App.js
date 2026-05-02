@@ -13,6 +13,13 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
     !!localStorage.getItem("adminToken")
   );
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem("darkMode") === "true"
+  );
+
+  useEffect(() => {
+    localStorage.setItem("darkMode", darkMode);
+  }, [darkMode]);
 
   useEffect(() => {
     // Check auth on mount
@@ -53,12 +60,15 @@ function App() {
           path="/*"
           element={
             <ProtectedRoute>
-              <div className="admin-container">
+                <div className={`admin-container ${darkMode ? 'dark-mode' : ''}`}>
                 <nav className="sidebar">
                   <h2>🛡️ UrbanEye Admin</h2>
                   <a href="/dashboard" className="nav-link">📊 Dashboard</a>
                   <a href="/issues" className="nav-link">📋 Issue Management</a>
                   <a href="/map" className="nav-link">🌍 Map View</a>
+                  <div className="mode-toggle" onClick={() => setDarkMode(!darkMode)}>
+                    {darkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
+                  </div>
                   <button onClick={handleLogout} className="logout-btn">Logout</button>
                 </nav>
                 <div className="main-content">

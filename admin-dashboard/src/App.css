@@ -242,3 +242,57 @@ body {
   background: var(--danger-color);
   color: white;
 }
+
+/* Dark Mode Overrides */
+.dark-mode {
+  --bg-color: #1a202c;
+  --text-color: #f7fafc;
+  background-color: var(--bg-color);
+}
+
+.dark-mode .main-content {
+  background-color: #1a202c;
+  color: #f7fafc;
+}
+
+.dark-mode .header, 
+.dark-mode .card {
+  background-color: #2d3748;
+  color: #f7fafc;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .data-table th {
+  background-color: #4a5568;
+  color: #f7fafc;
+}
+
+.dark-mode .data-table td {
+  border-bottom: 1px solid #4a5568;
+  color: #cbd5e0;
+}
+
+.dark-mode .data-table tr:hover {
+  background-color: #2d3748;
+}
+
+.dark-mode h1, 
+.dark-mode h2, 
+.dark-mode h3 {
+  color: #fff;
+}
+
+.mode-toggle {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.mode-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+}

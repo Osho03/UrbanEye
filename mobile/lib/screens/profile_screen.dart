@@ -1,7 +1,9 @@
-/// Profile Screen - User info, settings, stats
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
 
@@ -15,6 +17,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   int _reportCount = 0;
   bool _isLoading = true;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -33,8 +36,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       }
     } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _pickAndUploadPhoto() async {
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
+
+    if (image != null) {
+      final auth = Provider.of<AuthService>(context, listen: false);
+      final bytes = await image.readAsBytes();
+      
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      try {
+        final res = await ApiService.updateProfilePhoto(auth.userId, bytes, image.name);
+        Navigator.pop(context); // Close loading
+
+        if (res['success'] == true) {
+          await auth.updateLocalUser(photoUrl: res['photo_url']);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Profile photo updated!')),
+          );
+        }
+      } catch (e) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Upload failed: $e')),
+        );
       }
     }
   }
@@ -44,197 +80,197 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final auth = Provider.of<AuthService>(context);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Profile'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          'Profile Settings',
+          style: GoogleFonts.inter(color: Colors.black87, fontWeight: FontWeight.w700, fontSize: 18),
+        ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           children: [
-            // Profile Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF0D47A1), Color(0xFF00897B)],
-                ),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF1565C0).withOpacity(0.3),
-                    blurRadius: 16,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Column(
+            const SizedBox(height: 20),
+            // Profile Photo with Edit Badge
+            Center(
+              child: Stack(
                 children: [
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundColor: Colors.white24,
-                    child: Text(
-                      auth.userName.isNotEmpty ? auth.userName[0].toUpperCase() : 'U',
-                      style: GoogleFonts.inter(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                  Hero(
+                    tag: 'profile_photo',
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: const Color(0xFF4285F4).withOpacity(0.2), width: 1),
+                      ),
+                      child: CircleAvatar(
+                        radius: 60,
+                        backgroundColor: const Color(0xFFF8F9FE),
+                        backgroundImage: auth.currentUser?.profilePhoto != null 
+                          ? NetworkImage(auth.currentUser!.profilePhoto!.startsWith('http') 
+                              ? auth.currentUser!.profilePhoto! 
+                              : ApiService.getImageUrl(auth.currentUser!.profilePhoto))
+                          : null,
+                        child: auth.currentUser?.profilePhoto == null 
+                          ? const Icon(Icons.person, size: 60, color: Color(0xFF4285F4))
+                          : null,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    auth.userName,
-                    style: GoogleFonts.inter(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    auth.userEmail,
-                    style: GoogleFonts.inter(fontSize: 14, color: Colors.white70),
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      _isLoading ? 'Loading...' : '$_reportCount Reports Submitted',
-                      style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w500),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: _pickAndUploadPhoto,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF4285F4),
+                          shape: BoxShape.circle,
+                          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
+                        ),
+                        child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 20),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-
             const SizedBox(height: 24),
+            Text(
+              auth.userName,
+              style: GoogleFonts.inter(fontSize: 24, fontWeight: FontWeight.w800, color: const Color(0xFF202124)),
+            ),
+            Text(
+              auth.userEmail,
+              style: GoogleFonts.inter(fontSize: 14, color: const Color(0xFF5F6368), fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 32),
 
-            // Actions
-            _ProfileAction(
-              icon: Icons.person_outline,
-              title: 'Edit Profile',
-              subtitle: 'Update your name and phone',
+            // User Stats Row
+            Row(
+              children: [
+                _buildStatItem('Reports', _reportCount.toString()),
+                _buildStatItem('Accuracy', '94%'),
+                _buildStatItem('Rank', '#12'),
+              ],
+            ),
+            const SizedBox(height: 40),
+
+            // Settings Group
+            _buildSectionHeader('Account Settings'),
+            _buildSettingTile(
+              icon: Icons.person_outline_rounded,
+              title: 'Personal Information',
               onTap: () => _showEditProfile(context, auth),
             ),
-            _ProfileAction(
+            _buildSettingTile(
+              icon: Icons.notifications_none_rounded,
+              title: 'Notifications',
+              onTap: () {},
+            ),
+            _buildSettingTile(
+              icon: Icons.security_rounded,
+              title: 'Privacy & Security',
+              onTap: () {},
+            ),
+            
+            const SizedBox(height: 24),
+            _buildSectionHeader('System'),
+            _buildSettingTile(
               icon: Icons.dns_outlined,
-              title: 'Server Settings',
-              subtitle: ApiService.baseUrl,
+              title: 'Backend Configuration',
               onTap: () => _showServerConfig(context),
             ),
-            _ProfileAction(
-              icon: Icons.info_outline,
+            _buildSettingTile(
+              icon: Icons.info_outline_rounded,
               title: 'About UrbanEye',
-              subtitle: 'Version 1.0.0',
-              onTap: () {
-                showAboutDialog(
-                  context: context,
-                  applicationName: 'UrbanEye',
-                  applicationVersion: '1.0.0',
-                  applicationLegalese: '© 2026 UrbanEye Team',
-                  children: [
-                    const SizedBox(height: 16),
-                    const Text('AI-Powered Citizen Reporting System for smart city governance.'),
-                  ],
-                );
-              },
+              onTap: () {},
             ),
 
-            const SizedBox(height: 24),
-
+            const SizedBox(height: 40),
             // Logout
             SizedBox(
               width: double.infinity,
-              child: OutlinedButton.icon(
+              child: TextButton(
                 onPressed: () async {
-                  final confirm = await showDialog<bool>(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      title: const Text('Logout'),
-                      content: const Text('Are you sure you want to logout?'),
-                      actions: [
-                        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-                        ElevatedButton(
-                          onPressed: () => Navigator.pop(ctx, true),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                          child: const Text('Logout'),
-                        ),
-                      ],
-                    ),
-                  );
-                  if (confirm == true) {
-                    await auth.logout();
-                    if (context.mounted) {
-                      Navigator.of(context).pushReplacementNamed('/login');
-                    }
-                  }
+                  await auth.logout();
+                  if (mounted) Navigator.pushReplacementNamed(context, '/login');
                 },
-                icon: const Icon(Icons.logout, color: Colors.red),
-                label: const Text('Logout', style: TextStyle(color: Colors.red)),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  side: const BorderSide(color: Colors.red),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  foregroundColor: Colors.redAccent,
                 ),
+                child: const Text('Sign Out', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
+            const SizedBox(height: 40),
           ],
         ),
       ),
     );
   }
 
+  Widget _buildStatItem(String label, String value) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(value, style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w800, color: const Color(0xFF202124))),
+          const SizedBox(height: 4),
+          Text(label, style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF5F6368), fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          title,
+          style: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700, color: const Color(0xFF5F6368), letterSpacing: 0.5),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingTile({required IconData icon, required String title, required VoidCallback onTap}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        onTap: onTap,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        tileColor: const Color(0xFFF8F9FE),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        leading: Icon(icon, color: const Color(0xFF202124), size: 22),
+        title: Text(title, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: const Color(0xFF202124))),
+        trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
+      ),
+    );
+  }
+
   void _showEditProfile(BuildContext context, AuthService auth) {
     final nameController = TextEditingController(text: auth.userName);
-    final phoneController = TextEditingController(text: auth.currentUser?.phone ?? '');
-
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Edit Profile'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Name', prefixIcon: Icon(Icons.person)),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: phoneController,
-              decoration: const InputDecoration(labelText: 'Phone', prefixIcon: Icon(Icons.phone)),
-              keyboardType: TextInputType.phone,
-            ),
-          ],
-        ),
+        title: const Text('Edit Name'),
+        content: TextField(controller: nameController),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () async {
-              final name = nameController.text.trim();
-              final phone = phoneController.text.trim();
-              if (name.isNotEmpty) {
-                try {
-                  await ApiService.updateProfile(
-                    auth.userId,
-                    name: name,
-                    phone: phone,
-                  );
-                  await auth.updateLocalUser(name: name, phone: phone);
-                } catch (e) {
-                  // Still update locally
-                  await auth.updateLocalUser(name: name, phone: phone);
-                }
-                if (ctx.mounted) Navigator.pop(ctx);
-              }
+              await auth.updateLocalUser(name: nameController.text.trim());
+              Navigator.pop(ctx);
             },
             child: const Text('Save'),
           ),
@@ -248,75 +284,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Server URL'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                hintText: 'http://10.0.2.2:5000',
-                labelText: 'Backend URL',
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'For emulator: http://10.0.2.2:5000\nFor physical device: use your PC\'s IP',
-              style: GoogleFonts.inter(fontSize: 11, color: Colors.grey),
-            ),
-          ],
-        ),
+        title: const Text('Server Configuration'),
+        content: TextField(controller: controller, decoration: const InputDecoration(labelText: 'Base URL')),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () {
               ApiService.setBaseUrl(controller.text.trim());
               Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Server URL updated')),
-              );
             },
-            child: const Text('Save'),
+            child: const Text('Update'),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ProfileAction extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  const _ProfileAction({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Card(
-        child: ListTile(
-          leading: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1565C0).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: const Color(0xFF1565C0)),
-          ),
-          title: Text(title, style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
-          subtitle: Text(subtitle, style: GoogleFonts.inter(fontSize: 12, color: Colors.grey)),
-          trailing: Icon(Icons.chevron_right, color: Colors.grey.shade400),
-          onTap: onTap,
-        ),
       ),
     );
   }

@@ -6,6 +6,7 @@ class User {
   final String? phone;
   final String? role;
   final String? token;
+  final String? profilePhoto;
 
   User({
     required this.userId,
@@ -14,6 +15,7 @@ class User {
     this.phone,
     this.role,
     this.token,
+    this.profilePhoto,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -24,6 +26,7 @@ class User {
       phone: json['phone'] as String?,
       role: json['role'] as String?,
       token: json['token'] as String?,
+      profilePhoto: json['profile_photo'] as String?,
     );
   }
 
@@ -35,6 +38,7 @@ class User {
       'phone': phone,
       'role': role,
       'token': token,
+      'profile_photo': profilePhoto,
     };
   }
 }

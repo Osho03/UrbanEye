@@ -21,6 +21,9 @@ const IssueList = () => {
 
     useEffect(() => {
         fetchIssues();
+        // Auto-refresh feed every 10 seconds for real-time monitoring
+        const interval = setInterval(fetchIssues, 10000);
+        return () => clearInterval(interval);
     }, []);
 
     const fetchIssues = async () => {

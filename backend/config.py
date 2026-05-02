@@ -16,9 +16,9 @@ try:
     client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=10000)
     # Trigger a ping to verify connection works
     client.admin.command('ping')
-    print("✅ Successfully connected to MongoDB Cloud/Local")
+    print("Successfully connected to MongoDB Cloud/Local")
 except Exception as e:
-    print(f"❌ MongoDB Connection Error: {e}")
+    print(f"MongoDB Connection Error: {e}")
 
 db = client["urbaneye"]
 issues_collection = db["issues"]

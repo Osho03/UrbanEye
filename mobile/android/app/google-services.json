@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "368863146086",
+    "project_id": "urbaneye-17490",
+    "storage_bucket": "urbaneye-17490.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:368863146086:android:58e33256d8d960fd733da7",
+        "android_client_info": {
+          "package_name": "com.urbaneye.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "368863146086-3m86p9c4q35mqd34t9vksemae63i5rsh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.urbaneye.app",
+            "certificate_hash": "3069e03b381bcd850ad48a7f921e6fc3148251a2"
+          }
+        },
+        {
+          "client_id": "368863146086-1hpknb76qtp9lv76n52c4hnnrs3d2qu3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZzIQLz6m6XuNNxlqepwbQb4qVBMbfJIA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "368863146086-1hpknb76qtp9lv76n52c4hnnrs3d2qu3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

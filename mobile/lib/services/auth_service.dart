@@ -63,7 +63,7 @@ class AuthService extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      return 'Network error: ${ApiService.baseUrl}. Details: $e';
+      return 'Network error: $e';
     }
   }
 
@@ -95,7 +95,41 @@ class AuthService extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      return 'Network error: ${ApiService.baseUrl}. Details: $e';
+      return 'Network error: $e';
+    }
+  }
+
+  /// Google Login (Simulated One-Tap)
+  Future<String?> googleLogin({
+    required String name,
+    required String email,
+    String? profilePhoto,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final response = await ApiService.googleLogin(
+        name: name,
+        email: email,
+        profilePhoto: profilePhoto,
+      );
+
+      if (response['success'] == true) {
+        _currentUser = User.fromJson(response['user']);
+        await _saveUser();
+        _isLoading = false;
+        notifyListeners();
+        return null; // success
+      } else {
+        _isLoading = false;
+        notifyListeners();
+        return response['message'] ?? 'Google Login failed';
+      }
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      return 'Network error: $e';
     }
   }
 
@@ -116,7 +150,7 @@ class AuthService extends ChangeNotifier {
   }
 
   /// Update user info locally after profile edit
-  Future<void> updateLocalUser({String? name, String? phone}) async {
+  Future<void> updateLocalUser({String? name, String? phone, String? photoUrl}) async {
     if (_currentUser != null) {
       _currentUser = User(
         userId: _currentUser!.userId,
@@ -125,6 +159,7 @@ class AuthService extends ChangeNotifier {
         phone: phone ?? _currentUser!.phone,
         role: _currentUser!.role,
         token: _currentUser!.token,
+        profilePhoto: photoUrl ?? _currentUser!.profilePhoto,
       );
       await _saveUser();
       notifyListeners();
