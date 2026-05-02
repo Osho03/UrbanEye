@@ -263,3 +263,37 @@ def get_user_reports(user_id):
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 400
+
+@user_bp.route('/impact/<user_id>', methods=['GET'])
+def get_user_impact(user_id):
+    """Calculate and return user impact score and rank"""
+    try:
+        user = users_collection.find_one({"_id": ObjectId(user_id)})
+        if not user:
+             return jsonify({"success": False, "message": "User not found"}), 404
+
+        # Find all reports by this user to calculate impact
+        reports = list(issues_collection.find({
+            "$or": [
+                {"reported_by": user["name"]},
+                {"reporter_email": user["email"]}
+            ]
+        }))
+        
+        # Calculate total impact score
+        # In a real app, this would use a more complex algorithm
+        total_impact = sum(r.get('severity_score', 1) * 10 for r in reports)
+        
+        # Calculate rank
+        rank = "Bronze Citizen"
+        if total_impact > 500: rank = "Gold Guardian"
+        elif total_impact > 200: rank = "Silver Sentinel"
+        
+        return jsonify({
+            "success": True,
+            "total_impact": total_impact,
+            "rank": rank,
+            "reports_count": len(reports)
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500

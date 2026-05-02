@@ -22,7 +22,14 @@ def health_check():
 def handle_500(error):
     return jsonify({"error": "Internal Server Error", "message": str(error)}), 500
 
-# Lazy-load blueprints to speed up initial port binding
+# Try/Except for Chatbot to prevent crash
+try:
+    from routes.chatbot import bp as chatbot_bp
+    CHATBOT_AVAILABLE = True
+except (ImportError, Exception):
+    CHATBOT_AVAILABLE = False
+
+# Lazy-load blueprints
 from routes.issue import issue_bp
 from routes.admin import admin_bp
 from routes.analytics import analytics_bp
@@ -34,6 +41,9 @@ app.register_blueprint(admin_bp, url_prefix="/api/admin")
 app.register_blueprint(analytics_bp, url_prefix="/api/analytics")
 app.register_blueprint(user_bp, url_prefix="/api/user")
 app.register_blueprint(features_bp, url_prefix="/api/features")
+
+if CHATBOT_AVAILABLE:
+    app.register_blueprint(chatbot_bp)
 
 @app.route("/uploads/<path:filename>")
 def uploaded_file(filename):
