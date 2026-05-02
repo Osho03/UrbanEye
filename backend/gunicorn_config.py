@@ -7,9 +7,8 @@ import os
 # Use port 5000 to match Render's default scan
 bind = f"0.0.0.0:{os.environ.get('PORT', '5000')}"
 
-# Workers: Number of concurrent processes
-# Recommended: (2 x cores) + 1
-workers = multiprocessing.cpu_count() * 2 + 1
+# Workers: Reduced to 2 for Render Free Tier stability
+workers = 2
 
 # Worker Class: Use 'gevent' or 'eventlet' for high I/O concurrency 
 # (Requires gevent/eventlet in requirements.txt)
