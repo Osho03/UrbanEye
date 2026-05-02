@@ -5,7 +5,7 @@ import os
 # Designed for UrbanEye Million-Scale Civic Operations
 
 # Bind to 0.0.0.0 for external access (Render/Heroku/Docker)
-bind = f"0.0.0.0:{os.environ.get('PORT', '10000')}"
+bind = f"0.0.0.0:{os.environ.get('PORT', '5000')}"
 
 # Workers: Number of concurrent processes
 # Recommended: (2 x cores) + 1

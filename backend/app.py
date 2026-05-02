@@ -13,6 +13,11 @@ app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = None 
 CORS(app, resources={r"/*": {"origins": "*"}})
 
+@app.route("/")
+def home():
+    """Root route for Render's default health check"""
+    return jsonify({"status": "live", "message": "UrbanEye API is online"}), 200
+
 @app.route("/api/health")
 def health_check():
     """Ultra-fast health check for Render"""
