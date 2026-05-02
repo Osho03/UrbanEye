@@ -4,14 +4,9 @@ from bson import ObjectId
 from pymongo import MongoClient
 import os
 
-# Import AI modules
-try:
-    from ai.summarizer import summarizer
-    from ai.text_to_speech import voice_synth
-except ImportError:
-    print("Warning: AI modules not available")
-    summarizer = None
-    voice_synth = None
+# AI modules will be lazy-loaded inside routes to prevent startup timeouts
+summarizer = None
+voice_synth = None
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -281,6 +276,14 @@ def get_ai_recommendation(issue_id):
 @admin_bp.route("/issues/<issue_id>/summary/generate", methods=['POST'])
 def generate_summary(issue_id):
     """Generate AI summary for an issue"""
+    global summarizer
+    if not summarizer:
+        try:
+            from ai.summarizer import summarizer as ai_summarizer
+            summarizer = ai_summarizer
+        except ImportError:
+            return jsonify({"error": "Summarizer module not found"}), 503
+            
     if not summarizer:
         return jsonify({"error": "Summarizer not available. Please configure OpenAI API key."}), 503
     
@@ -320,6 +323,14 @@ def generate_summary(issue_id):
 @admin_bp.route("/issues/<issue_id>/voice/generate", methods=['POST'])
 def generate_voice(issue_id):
     """Generate voice audio for issue summary"""
+    global voice_synth, summarizer
+    if not voice_synth:
+        try:
+            from ai.text_to_speech import voice_synth as ai_voice
+            voice_synth = ai_voice
+        except ImportError:
+            return jsonify({"error": "Voice module not found"}), 503
+
     if not voice_synth:
         return jsonify({"error": "Voice synthesis module not loaded. Check server logs."}), 503
     

@@ -2,12 +2,6 @@ import os
 from flask import Blueprint, request, jsonify
 from config import issues_collection
 from datetime import datetime
-try:
-    from ai.image_classifier import classify_issue
-except Exception as e:
-    print(f"Warning: image_classifier not available: {e}")
-    def classify_issue(path): return "unknown"
-from routes.routing import get_routing_info
 
 issue_bp = Blueprint("issue", __name__)
 
@@ -18,6 +12,14 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def report_issue():
     print("➡️ Received Report Request") # DEBUG LOG
     
+    # Lazy imports
+    from routes.routing import get_routing_info
+    try:
+        from ai.image_classifier import classify_issue
+    except Exception as e:
+        print(f"Warning: image_classifier not available: {e}")
+        def classify_issue(path): return "unknown"
+
     # Initialize ALL variables at start to prevent UnboundLocalError
     forensics_data = {"status": "Skipped", "details": "No image provided"}
     severity_data = {"score": 1, "label": "Low", "details": {"method": "default"}}
