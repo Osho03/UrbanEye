@@ -16,9 +16,7 @@ import 'package:mime/mime.dart';
 import '../models/issue_model.dart';
 
 class ApiService {
-  static String baseUrl = kIsWeb
-      ? 'http://localhost:5000'
-      : 'http://192.168.1.3:5000'; // Using local Wi-Fi IP to avoid 503 errors
+  static String baseUrl = 'https://urbaneye-backend-jiqq.onrender.com';
 
   /// Configure base URL (call from settings)
   static void setBaseUrl(String url) {

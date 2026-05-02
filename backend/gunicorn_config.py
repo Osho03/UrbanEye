@@ -1,10 +1,11 @@
 import multiprocessing
+import os
 
 # Gunicorn Configuration for High Concurrency & Stability
 # Designed for UrbanEye Million-Scale Civic Operations
 
 # Bind to 0.0.0.0 for external access (Render/Heroku/Docker)
-bind = "0.0.0.0:5000"
+bind = f"0.0.0.0:{os.environ.get('PORT', '10000')}"
 
 # Workers: Number of concurrent processes
 # Recommended: (2 x cores) + 1
