@@ -4,8 +4,8 @@ import os
 # Gunicorn Configuration for High Concurrency & Stability
 # Designed for UrbanEye Million-Scale Civic Operations
 
-# Use port 5000 to match Render's default scan
-bind = f"0.0.0.0:{os.environ.get('PORT', '5000')}"
+# FORCE port 5000 to match Render's scan (Hammer Fix)
+bind = "0.0.0.0:5000"
 
 # Workers: Reduced to 2 for Render Free Tier stability
 workers = 2
