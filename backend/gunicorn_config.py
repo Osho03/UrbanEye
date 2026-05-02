@@ -4,8 +4,8 @@ import os
 # Gunicorn Configuration for High Concurrency & Stability
 # Designed for UrbanEye Million-Scale Civic Operations
 
-# Force port 10000 for Render compatibility
-bind = f"0.0.0.0:{os.environ.get('PORT', '10000')}"
+# Use port 5000 to match Render's default scan
+bind = f"0.0.0.0:{os.environ.get('PORT', '5000')}"
 
 # Workers: Number of concurrent processes
 # Recommended: (2 x cores) + 1
