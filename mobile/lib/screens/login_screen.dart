@@ -92,6 +92,42 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     );
   }
 
+  void _showServerConfig(BuildContext context) {
+    final controller = TextEditingController(text: ApiService.baseUrl);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Server Configuration'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Backend Base URL',
+            hintText: 'https://urbaneye-backend-jiqq.onrender.com',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              ApiService.setBaseUrl(controller.text.trim());
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Server set to: ${ApiService.baseUrl}'),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _handleAuthResult(String? error) {
     if (!mounted) return;
     if (error != null) {
@@ -142,10 +178,22 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    const Color(0xFF4285F4).withOpacity(0.1),
+                    const Color(0xFF4285F4).withValues(alpha: 0.1),
                     Colors.white,
                   ],
                 ),
+              ),
+            ),
+          ),
+          // Server Settings Icon (Top Right)
+          Positioned(
+            top: 12,
+            right: 12,
+            child: SafeArea(
+              child: IconButton(
+                icon: const Icon(Icons.settings_outlined, color: Color(0xFF5F6368)),
+                tooltip: 'Server Settings',
+                onPressed: () => _showServerConfig(context),
               ),
             ),
           ),
@@ -166,7 +214,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF4285F4).withOpacity(0.1),
+                              color: const Color(0xFF4285F4).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: const Icon(
@@ -342,7 +390,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Image.network(
-                'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_\"G\"_logo.svg/1200px-Google_\"G\"_logo.svg.png',
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_"G"_logo.svg/1200px-Google_"G"_logo.svg.png',
                 height: 20,
                 errorBuilder: (context, error, stackTrace) => const Icon(Icons.g_mobiledata, color: Colors.blue),
               ),

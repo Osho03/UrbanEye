@@ -1,11 +1,10 @@
-/// Report Screen — Client-Only (All AI via Flask Backend)
-/// Flutter sends image (multipart/form-data) + GPS (lat/lng) to backend.
-/// Backend handles: image classification, routing, severity, department.
-/// NO AI logic, NO API keys in this file or anywhere in Flutter.
-/// Upgrade: Professional Camera Package with Live Viewfinder & Permission handling.
+// Report Screen — Client-Only (All AI via Flask Backend)
+// Flutter sends image (multipart/form-data) + GPS (lat/lng) to backend.
+// Backend handles: image classification, routing, severity, department.
+// NO AI logic, NO API keys in this file or anywhere in Flutter.
+// Upgrade: Professional Camera Package with Live Viewfinder & Permission handling.
 import 'dart:typed_data';
 import 'package:camera/camera.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -111,7 +110,7 @@ class _ReportScreenState extends State<ReportScreen> {
         setState(() => _isCameraError = true);
       }
     } catch (e) {
-      print('Camera initialization error: $e');
+      debugPrint('Camera initialization error: $e');
       if (mounted) {
         setState(() {
           _isCameraError = true;
@@ -135,19 +134,6 @@ class _ReportScreenState extends State<ReportScreen> {
       });
     } catch (e) {
       _showError('Capture error: $e');
-    }
-  }
-
-  // Fallback pickers
-  Future<void> _captureFromPicker() async {
-    try {
-      final XFile? photo = await _picker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 85,
-      );
-      if (photo != null) await _handlePickedFile(photo);
-    } catch (e) {
-      _showError('Camera error: $e');
     }
   }
 
@@ -341,7 +327,7 @@ class _ReportScreenState extends State<ReportScreen> {
                   value: result['assigned_department'] ?? 'Auto-routing...'),
               _InsightRow(
                   label: 'PRIORITY', value: result['priority'] ?? 'High'),
-              _InsightRow(label: 'ETA', value: '24-48 HRS'),
+              const _InsightRow(label: 'ETA', value: '24-48 HRS'),
               if (result['issue_id'] != null)
                 _InsightRow(label: 'CASE ID', value: '${result['issue_id']}'),
               const SizedBox(height: 16),
@@ -917,8 +903,11 @@ class _InsightRow extends StatelessWidget {
   final String label;
   final String value;
   final bool highlight;
-  const _InsightRow(
-      {required this.label, required this.value, this.highlight = false});
+  const _InsightRow({
+    required this.label,
+    required this.value,
+    this.highlight = false,
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,5 +1,5 @@
-/// Map Screen — Shows all reported issues on OpenStreetMap
-/// All data fetched from Flask Backend. No AI logic in Flutter.
+// Map Screen — Shows all reported issues on OpenStreetMap
+// All data fetched from Flask Backend. No AI logic in Flutter.
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -76,7 +76,7 @@ class _MapScreenState extends State<MapScreen> {
           ),
           IconButton(
             onPressed: () {
-              _mapController.move(LatLng(20.5937, 78.9629), 5);
+              _mapController.move(const LatLng(20.5937, 78.9629), 5);
             },
             icon: const Icon(Icons.zoom_out_map),
             tooltip: 'Reset View',
@@ -87,8 +87,8 @@ class _MapScreenState extends State<MapScreen> {
         children: [
           FlutterMap(
             mapController: _mapController,
-            options: MapOptions(
-              initialCenter: LatLng(20.5937, 78.9629), // India center
+            options: const MapOptions(
+              initialCenter: LatLng(20.5937, 78.9629),
               initialZoom: 5,
             ),
             children: [
@@ -117,7 +117,7 @@ class _MapScreenState extends State<MapScreen> {
                         return CircleMarker(
                           point: LatLng(lat, lon),
                           radius: (count * 8.0).clamp(20.0, 80.0),
-                          color: Colors.red.withOpacity(0.25),
+                          color: Colors.red.withValues(alpha: 0.25),
                           borderColor: Colors.red.shade700,
                           borderStrokeWidth: 2,
                         );
@@ -151,7 +151,7 @@ class _MapScreenState extends State<MapScreen> {
                               border: Border.all(color: Colors.white, width: 2),
                               boxShadow: [
                                 BoxShadow(
-                                  color: issue.statusColor.withOpacity(0.4),
+                                  color: issue.statusColor.withValues(alpha: 0.4),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
@@ -183,7 +183,7 @@ class _MapScreenState extends State<MapScreen> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                      color: Colors.black.withOpacity(0.1), blurRadius: 8),
+                      color: Colors.black.withValues(alpha: 0.1), blurRadius: 8),
                 ],
               ),
               child: Column(
@@ -194,11 +194,9 @@ class _MapScreenState extends State<MapScreen> {
                       style: GoogleFonts.inter(
                           fontWeight: FontWeight.w600, fontSize: 12)),
                   const SizedBox(height: 6),
-                  _LegendItem(color: const Color(0xFFFFA726), label: 'Pending'),
-                  _LegendItem(
-                      color: const Color(0xFF42A5F5), label: 'Assigned'),
-                  _LegendItem(
-                      color: const Color(0xFF66BB6A), label: 'Resolved'),
+                  const _LegendItem(color: Color(0xFFFFA726), label: 'Pending'),
+                  const _LegendItem(color: Color(0xFF42A5F5), label: 'Assigned'),
+                  const _LegendItem(color: Color(0xFF66BB6A), label: 'Resolved'),
                   if (_showHotspots)
                     _LegendItem(
                         color: Colors.red.shade300, label: 'Hotspot Zone'),
@@ -218,7 +216,7 @@ class _MapScreenState extends State<MapScreen> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                      color: Colors.black.withOpacity(0.1), blurRadius: 8),
+                      color: Colors.black.withValues(alpha: 0.1), blurRadius: 8),
                 ],
               ),
               child: Row(

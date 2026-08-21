@@ -1,4 +1,4 @@
-/// My Reports Screen - Shows user's complaint history
+// My Reports Screen - Shows user's complaint history
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -215,9 +215,9 @@ class _IssueCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: issue.statusColor.withOpacity(0.1),
+                  color: issue.statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: issue.statusColor.withOpacity(0.3)),
+                  border: Border.all(color: issue.statusColor.withValues(alpha: 0.3)),
                 ),
                 child: Text(
                   issue.status ?? 'Unknown',

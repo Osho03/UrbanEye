@@ -1,14 +1,13 @@
-/// ============================================================
-/// API Service for UrbanEye — Client-Only Architecture
-/// ============================================================
-/// Flutter is a PURE CLIENT INTERFACE.
-/// All AI operations (classification, chatbot, summarization,
-/// prediction) are handled by the Flask Backend.
-/// Flutter sends requests ONLY to backend endpoints.
-/// NO AI API keys or AI logic exists in Flutter.
-/// ============================================================
+// ============================================================
+// API Service for UrbanEye — Client-Only Architecture
+// ============================================================
+// Flutter is a PURE CLIENT INTERFACE.
+// All AI operations (classification, chatbot, summarization,
+// prediction) are handled by the Flask Backend.
+// Flutter sends requests ONLY to backend endpoints.
+// NO AI API keys or AI logic exists in Flutter.
+// ============================================================
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
@@ -172,7 +171,7 @@ class ApiService {
         return jsonDecode(response.body);
       }
     } catch (e) {
-      print('Error getting impact: $e');
+      debugPrint('Error getting impact: $e');
     }
     return {'total_impact': 0, 'rank': 'Bronze Citizen'};
   }
@@ -273,7 +272,7 @@ class ApiService {
         return jsonDecode(response.body);
       }
     } catch (e) {
-      print('Error getting issue status: $e');
+      debugPrint('Error getting issue status: $e');
     }
     return null;
   }
@@ -315,7 +314,7 @@ class ApiService {
         return jsonDecode(response.body) as List<dynamic>;
       }
     } catch (e) {
-      print('Error getting hotspots: $e');
+      debugPrint('Error getting hotspots: $e');
     }
     return [];
   }
@@ -332,7 +331,7 @@ class ApiService {
         return jsonDecode(response.body);
       }
     } catch (e) {
-      print('Error getting analytics: $e');
+      debugPrint('Error getting analytics: $e');
     }
     return {
       'total': 0,
@@ -381,7 +380,7 @@ class ApiService {
         headers: _getHeaders(),
       );
     } catch (e) {
-      print('Clear chat error: $e');
+      debugPrint('Clear chat error: $e');
     }
   }
 }

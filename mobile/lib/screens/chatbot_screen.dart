@@ -1,4 +1,4 @@
-/// Chatbot Screen - AI Assistant (matches web app Chatbot.js)
+// Chatbot Screen - AI Assistant (matches web app Chatbot.js)
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -154,7 +154,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, -2),
                 ),
@@ -294,8 +294,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           boxShadow: [
             BoxShadow(
               color: isUser
-                  ? const Color(0xFF667eea).withOpacity(0.3)
-                  : Colors.black.withOpacity(0.06),
+                  ? const Color(0xFF667eea).withValues(alpha: 0.3)
+                  : Colors.black.withValues(alpha: 0.06),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -328,11 +328,11 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _BouncingDot(delay: 0),
+            const _BouncingDot(delay: 0),
             const SizedBox(width: 4),
-            _BouncingDot(delay: 160),
+            const _BouncingDot(delay: 160),
             const SizedBox(width: 4),
-            _BouncingDot(delay: 320),
+            const _BouncingDot(delay: 320),
             const SizedBox(width: 8),
             Text('Thinking...',
                 style: GoogleFonts.inter(color: Colors.grey, fontSize: 13)),

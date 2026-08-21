@@ -1,4 +1,4 @@
-/// Auth Service - Manages user state and local storage
+// Auth Service - Manages user state and local storage
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,7 +25,7 @@ class AuthService extends ChangeNotifier {
         _currentUser = User.fromJson(jsonDecode(userData));
         notifyListeners();
       } catch (e) {
-        print('Error loading user: $e');
+        debugPrint('Error loading user: $e');
         await prefs.remove('user_data');
       }
     }

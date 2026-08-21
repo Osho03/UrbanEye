@@ -24,7 +24,7 @@ def get_feature_status():
         
         if not flags:
             # Seed the database if no flags exist
-            feature_flags_collection.insert_one(default_flags)
+            feature_flags_collection.insert_one(dict(default_flags))
             return jsonify(default_flags)
             
         return jsonify(flags)

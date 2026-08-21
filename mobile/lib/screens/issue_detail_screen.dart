@@ -1,5 +1,5 @@
-/// Issue Detail Screen - Full details + AI Summary (backend-powered)
-/// All AI operations are processed by the Flask backend.
+// Issue Detail Screen - Full details + AI Summary (backend-powered)
+// All AI operations are processed by the Flask backend.
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -438,7 +438,7 @@ class _TimelineItem extends StatelessWidget {
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2),
                     boxShadow: [
-                      BoxShadow(color: dotColor.withOpacity(0.3), blurRadius: 4)
+                      BoxShadow(color: dotColor.withValues(alpha: 0.3), blurRadius: 4)
                     ],
                   ),
                 ),

@@ -1,4 +1,4 @@
-/// Issue model for UrbanEye
+// Issue model for UrbanEye
 import 'dart:ui';
 
 class Issue {

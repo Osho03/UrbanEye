@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +14,6 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   int _reportCount = 0;
-  bool _isLoading = true;
   final ImagePicker _picker = ImagePicker();
 
   @override
@@ -26,30 +23,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadStats() async {
+    final auth = Provider.of<AuthService>(context, listen: false);
     try {
-      final auth = Provider.of<AuthService>(context, listen: false);
       final reports = await ApiService.getUserReports(auth.userId);
       if (mounted) {
         setState(() {
           _reportCount = reports.length;
-          _isLoading = false;
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _isLoading = false);
+      // Error loading stats, silently handled
     }
   }
 
   Future<void> _pickAndUploadPhoto() async {
+    if (!mounted) return;
+    final auth = Provider.of<AuthService>(context, listen: false);
+    
     final XFile? image = await _picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 70,
     );
 
     if (image != null) {
-      final auth = Provider.of<AuthService>(context, listen: false);
       final bytes = await image.readAsBytes();
       
+      if (!mounted) return;
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -58,15 +57,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       try {
         final res = await ApiService.updateProfilePhoto(auth.userId, bytes, image.name);
-        Navigator.pop(context); // Close loading
+        if (!mounted) return;
+        Navigator.pop(context);
 
         if (res['success'] == true) {
           await auth.updateLocalUser(photoUrl: res['photo_url']);
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Profile photo updated!')),
           );
         }
       } catch (e) {
+        if (!mounted) return;
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Upload failed: $e')),
@@ -108,7 +110,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFF4285F4).withOpacity(0.2), width: 1),
+                        border: Border.all(color: const Color(0xFF4285F4).withValues(alpha: 0.2), width: 1),
                       ),
                       child: CircleAvatar(
                         radius: 60,
@@ -202,7 +204,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: TextButton(
                 onPressed: () async {
                   await auth.logout();
-                  if (mounted) Navigator.pushReplacementNamed(context, '/login');
+                  if (context.mounted) Navigator.pushReplacementNamed(context, '/login');
                 },
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -270,7 +272,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ElevatedButton(
             onPressed: () async {
               await auth.updateLocalUser(name: nameController.text.trim());
-              Navigator.pop(ctx);
+              if (ctx.mounted) Navigator.pop(ctx);
             },
             child: const Text('Save'),
           ),
