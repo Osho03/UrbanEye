@@ -9,7 +9,6 @@ import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/report_screen.dart';
 import 'screens/my_reports_screen.dart';
-import 'screens/issue_detail_screen.dart';
 import 'screens/map_screen.dart';
 import 'screens/profile_screen.dart';
 import 'services/api_service.dart';
@@ -123,7 +122,7 @@ class UrbanEyeApp extends StatelessWidget {
           vertical: 16,
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         clipBehavior: Clip.antiAlias,
