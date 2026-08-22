@@ -21,7 +21,7 @@ def home():
 @app.route("/api/health")
 def health_check():
     """Ultra-fast health check for Render"""
-    return {"status": "ok", "message": "UrbanEye Live"}, 200
+    return {"status": "ok", "message": "UrbanEye Live", "build": "phase4-5cc9793"}, 200
 
 @app.errorhandler(500)
 def handle_500(error):
