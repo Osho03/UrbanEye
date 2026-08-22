@@ -1,4 +1,6 @@
 import os
+import time
+
 from pymongo import MongoClient
 from dotenv import load_dotenv
 
@@ -12,23 +14,63 @@ if os.path.exists(env_path):
 # Render will provide MONGO_URI directly in the environment
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 
+# When MONGO_URI is explicitly configured we are in production:
+# localhost is NOT an acceptable fallback target.
+EXPLICIT_CLOUD = bool(os.getenv("MONGO_URI"))
+
+CONNECT_TIMEOUT_MS = 20000
+
+
+def _mask(uri):
+    """Hide password in logs."""
+    import re
+    return re.sub(r"(//[^:/@]+):[^@]*@", r"\1:***@", uri)
+
+
+def _try_connect(timeout_ms):
+    c = MongoClient(
+        MONGO_URI,
+        serverSelectionTimeoutMS=timeout_ms,
+        connectTimeoutMS=CONNECT_TIMEOUT_MS,
+    )
+    c.admin.command("ping")  # force real handshake now, not lazily later
+    return c
+
+
 client = None
-try:
-    client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=10000)
-    # Trigger a ping to verify connection works
-    client.admin.command('ping')
-    print("Successfully connected to MongoDB Cloud/Local")
-except Exception as e:
-    print(f"MongoDB Connection Error with {MONGO_URI}: {e}")
-    print("Falling back to local MongoDB (mongodb://localhost:27017)...")
+attempts = 3 if EXPLICIT_CLOUD else 1
+last_error = None
+
+for attempt in range(1, attempts + 1):
     try:
-        client = MongoClient("mongodb://localhost:27017", serverSelectionTimeoutMS=10000)
-        client.admin.command('ping')
-        print("Successfully connected to local MongoDB")
-    except Exception as e2:
-        print(f"Local MongoDB also failed: {e2}")
-        # Last resort - create client anyway, app will fail gracefully on DB operations
-        client = MongoClient("mongodb://localhost:27017", serverSelectionTimeoutMS=5000)
+        client = _try_connect(timeout_ms=15000)
+        print(f"[db] Connected to MongoDB: {_mask(MONGO_URI)} "
+              f"(attempt {attempt})")
+        break
+    except Exception as e:
+        last_error = e
+        print(f"[db] Attempt {attempt}/{attempts} failed for "
+              f"{_mask(MONGO_URI)}: {type(e).__name__}: {e}")
+        if attempt < attempts:
+            time.sleep(4)
+
+if client is None:
+    if EXPLICIT_CLOUD:
+        # Production: NEVER downgrade to localhost. Keep a live client pointed
+        # at the configured cluster; individual requests will surface errors
+        # until connectivity recovers (e.g. Atlas IP whitelist fix).
+        print(f"[db] FATAL: MONGO_URI is configured but unreachable "
+              f"after {attempts} attempts. Keeping cloud client - NO "
+              f"localhost fallback. Last error: {last_error}")
+        client = MongoClient(
+            MONGO_URI,
+            serverSelectionTimeoutMS=15000,
+            connectTimeoutMS=CONNECT_TIMEOUT_MS,
+        )
+    else:
+        print("[db] No MONGO_URI configured - using local development DB")
+        client = MongoClient("mongodb://localhost:27017",
+                             serverSelectionTimeoutMS=5000)
 
 db = client["urbaneye"]
 issues_collection = db["issues"]
