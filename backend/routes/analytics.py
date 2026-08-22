@@ -73,24 +73,53 @@ def get_statistics():
 @analytics_bp.route("/hotspots", methods=["GET"])
 def get_hotspots():
     """
-    Predictive Maintenance: Find clusters of issues.
+    Predictive Maintenance (Phase 4): DBSCAN density clustering.
+    Finds hotspots of any shape; lonely issues are ignored as noise.
     """
     # Get all active issues (ignore resolved)
     issues = list(issues_collection.find(
         {"status": {"$in": ["Pending", "Assigned", "In Progress"]}},
-        {"latitude": 1, "longitude": 1, "issue_type": 1}
+        {"latitude": 1, "longitude": 1, "issue_type": 1,
+         "severity_label": 1}
     ))
-    
-    # Convert latitude/longitude to float if stored as strings
-    for issue in issues:
-        try:
-            issue["latitude"] = float(issue["latitude"])
-            issue["longitude"] = float(issue["longitude"])
-        except:
-            continue
-            
-    from ai.predictive_analytics import detect_hotspots
-    # Find clusters within 50 meters, min 3 issues
-    hotspots = detect_hotspots(issues, radius=50, min_count=3)
-    
+
+    try:
+        from ai.hotspot_engine import detect_hotspots
+        hotspots = detect_hotspots(issues, radius=50, min_count=3)
+    except Exception as e:
+        print(f"DBSCAN engine failed ({e}) - legacy fallback")
+        from ai.predictive_analytics import detect_hotspots as legacy
+        for issue in issues:
+            try:
+                issue["latitude"] = float(issue["latitude"])
+                issue["longitude"] = float(issue["longitude"])
+            except Exception:
+                continue
+        hotspots = legacy(issues, radius=50, min_count=3)
+
     return jsonify(hotspots)
+
+
+@analytics_bp.route("/patterns", methods=["GET"])
+def get_patterns():
+    """
+    Phase 4: Seasonal pattern mining over the last 12 months of history.
+    Returns monthly matrices per issue type, monsoon-style spikes,
+    weekday load profile and plain-language recommendations.
+    """
+    from datetime import datetime, timedelta
+    from ai.seasonal_mining import mine_patterns
+
+    year_ago = datetime.now() - timedelta(days=365)
+    issues = list(issues_collection.find(
+        {"created_at": {"$gte": year_ago}},
+        {"issue_type": 1, "created_at": 1}
+    ))
+    return jsonify(mine_patterns(issues))
+
+
+@analytics_bp.route("/priority-model", methods=["GET"])
+def priority_model_status():
+    """Phase 4: is the self-training priority brain active yet?"""
+    from ai.priority_model import model_status
+    return jsonify(model_status())

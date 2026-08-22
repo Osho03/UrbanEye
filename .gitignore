@@ -63,6 +63,7 @@ backend/uploads/
 *.h5
 *.model
 *.pkl
+priority_model_meta.json
 backend/data/db/
 
 # Build artifacts & logs

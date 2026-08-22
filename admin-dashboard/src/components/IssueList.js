@@ -127,13 +127,15 @@ const IssueList = () => {
                                 // ... (rest of map logic remains same, just styling updates)
                                 let thumbUrl = null;
                                 let isVideo = false;
-                                if (issue.image_path) {
-                                    const normalizedPath = issue.image_path.replace(/\\/g, "/");
-                                    const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
-                                    const BASE_URL = API_URL.replace("/api", "");
+                                const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+                                const BASE_URL = API_URL.replace("/api", "");
+                                // Phase 3: prefer AI-annotated thumbnail when available
+                                const rawThumbPath = issue.detected_image || issue.image_path;
+                                if (rawThumbPath) {
+                                    const normalizedPath = rawThumbPath.replace(/\\/g, "/");
                                     thumbUrl = `${BASE_URL}/${normalizedPath}`;
                                     const lower = normalizedPath.toLowerCase();
-                                    if (issue.media_type === "video" || lower.endsWith(".mp4") || lower.endsWith(".mov")) {
+                                    if (issue.media_type === "video" || (!issue.detected_image && (lower.endsWith(".mp4") || lower.endsWith(".mov")))) {
                                         isVideo = true;
                                     }
                                 }

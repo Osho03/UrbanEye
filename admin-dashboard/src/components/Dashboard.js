@@ -13,6 +13,7 @@ import {
 import { Doughnut, Bar } from "react-chartjs-2";
 import PredictiveMaintenance from "./PredictiveMaintenance";
 import AutonomousAgentStatus from "./AutonomousAgentStatus";
+import SeasonalPatterns from "./SeasonalPatterns";
 
 // Register ChartJS components
 ChartJS.register(
@@ -183,6 +184,9 @@ const Dashboard = () => {
                         />
                     </div>
                 </div>
+
+                {/* Phase 4: Seasonal Intelligence */}
+                <SeasonalPatterns />
 
             </div>
         </div>

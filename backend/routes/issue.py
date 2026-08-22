@@ -81,6 +81,7 @@ def report_issue():
         else:
             # IMAGE FLOW (Existing)
             media_type = "image"
+            detected_image = None  # Phase 3: annotated YOLO overlay path
             
             # 1. Compute Hash
             from ai.duplicate_detector import compute_dhash, find_potential_duplicate
@@ -130,6 +131,13 @@ def report_issue():
                         }
                     }
                     print(f"✅ YOLOv8 Detection: {issue_type} ({severity_data['label']})")
+
+                    # Phase 3: Visual Detection Layer - paint boxes on the proof
+                    from ai.annotate import annotate_detection
+                    detected_image = annotate_detection(image_path, yolo_result)
+                    if detected_image:
+                        severity_data["details"]["annotated"] = True
+                        print(f"🖼️ Annotated evidence saved: {detected_image}")
                 else:
                     # FALLBACK: Use existing MobileNetV2 classifier
                     ai_result = classify_issue(image_path)
@@ -214,6 +222,7 @@ def report_issue():
         "address": data.get("address"), # NEW: Store the reverse-geocoded address
         "issue_type": issue_type,
         "image_path": image_path,
+        "detected_image": detected_image if media_type == "image" else None,  # Phase 3
         "status": status,
         "assigned_department": routing["dept"],
         "priority": routing["priority"],

@@ -105,17 +105,23 @@ const IssueDetail = () => {
 
     // Safe URL generation
     let imageUrl = null;
+    let annotatedUrl = null;  // Phase 3: AI-annotated overlay
     let isVideo = false;
+
+    const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+    const BASE_URL = API_URL.replace("/api", "");
+
+    if (issue.detected_image) {
+        annotatedUrl = `${BASE_URL}/${issue.detected_image.replace(/\\/g, "/")}`;
+    }
 
     if (issue.image_path) {
         const normalizedPath = issue.image_path.replace(/\\/g, "/");
-        const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
-        const BASE_URL = API_URL.replace("/api", "");
         imageUrl = `${BASE_URL}/${normalizedPath}`;
 
         // Determine type
         const lowerPath = normalizedPath.toLowerCase();
-        if (issue.media_type === "video" || lowerPath.endsWith(".mp4") || lowerPath.endsWith(".mov") || lowerPath.endsWith(".avi")) {
+        if (!issue.detected_image && (issue.media_type === "video" || lowerPath.endsWith(".mp4") || lowerPath.endsWith(".mov") || lowerPath.endsWith(".avi"))) {
             isVideo = true;
         }
     }
@@ -196,7 +202,7 @@ const IssueDetail = () => {
                     <div className="card">
                         <h3 style={{ marginTop: 0 }}>📸 Visual Evidence</h3>
 
-                        {imageUrl ? (
+                        {(annotatedUrl || imageUrl) ? (
                             isVideo ? (
                                 <video
                                     src={imageUrl}
@@ -207,12 +213,50 @@ const IssueDetail = () => {
                                     Your browser does not support videos.
                                 </video>
                             ) : (
-                                <img
-                                    src={imageUrl}
-                                    alt={issue.issue_type}
-                                    className="detail-image"
-                                    onError={(e) => { e.target.src = "https://via.placeholder.com/400?text=Image+Load+Error"; }}
-                                />
+                                <>
+                                    {annotatedUrl && (
+                                        <>
+                                            <div style={{
+                                                fontSize: "0.8rem",
+                                                fontWeight: "600",
+                                                color: "#2563eb",
+                                                marginBottom: "0.4rem",
+                                                textTransform: "uppercase",
+                                                letterSpacing: "0.04em"
+                                            }}>
+                                                🤖 AI Detection View
+                                                {issue.severity_details?.confidence != null &&
+                                                    ` · ${(issue.severity_details.confidence * 100).toFixed(0)}% confidence`}
+                                            </div>
+                                            <img
+                                                src={annotatedUrl}
+                                                alt={`${issue.issue_type} detected`}
+                                                className="detail-image"
+                                                onError={(e) => { e.target.style.display = "none"; }}
+                                            />
+                                        </>
+                                    )}
+                                    {imageUrl && (
+                                        <>
+                                            <div style={{
+                                                fontSize: "0.8rem",
+                                                fontWeight: "600",
+                                                color: "#64748b",
+                                                margin: annotatedUrl ? "0.8rem 0 0.4rem" : "0 0 0.4rem",
+                                                textTransform: "uppercase",
+                                                letterSpacing: "0.04em"
+                                            }}>
+                                                📷 Original Photo
+                                            </div>
+                                            <img
+                                                src={imageUrl}
+                                                alt={issue.issue_type}
+                                                className="detail-image"
+                                                onError={(e) => { e.target.src = "https://via.placeholder.com/400?text=Image+Load+Error"; }}
+                                            />
+                                        </>
+                                    )}
+                                </>
                             )
                         ) : (
                             <div style={{
