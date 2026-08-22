@@ -1,12 +1,8 @@
 from flask import Blueprint, jsonify
-from pymongo import MongoClient
+
+from config import issues_collection
 
 analytics_bp = Blueprint("analytics", __name__)
-
-# Database connection
-client = MongoClient("mongodb://localhost:27017/")
-db = client["urbaneye"]
-issues_collection = db["issues"]
 
 @analytics_bp.route("/stats", methods=["GET"])
 def get_statistics():
