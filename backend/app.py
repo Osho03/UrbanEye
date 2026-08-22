@@ -21,7 +21,27 @@ def home():
 @app.route("/api/health")
 def health_check():
     """Ultra-fast health check for Render"""
-    return {"status": "ok", "message": "UrbanEye Live", "build": "phase4-5cc9793"}, 200
+    return {"status": "ok", "message": "UrbanEye Live", "build": "phase4-dbcheck"}, 200
+
+
+@app.route("/api/health/db")
+def health_db():
+    """Diagnose DB connectivity from inside the server. Never leaks credentials."""
+    import re
+    from config import client as db_client, MONGO_URI
+    masked = re.sub(r"(//[^:/@]+):[^@]*@", r"\1:***@", MONGO_URI)
+    try:
+        db_client.admin.command("ping")
+        n = None
+        try:
+            from config import issues_collection
+            n = issues_collection.count_documents({})
+        except Exception as e2:
+            n = f"count failed: {type(e2).__name__}"
+        return {"db": "reachable", "uri": masked, "issue_count": n}, 200
+    except Exception as e:
+        return {"db": "UNREACHABLE", "uri": masked,
+                "error": f"{type(e).__name__}: {e}"}, 200
 
 @app.errorhandler(500)
 def handle_500(error):
