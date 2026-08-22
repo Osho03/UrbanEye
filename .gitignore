@@ -6,6 +6,15 @@ env/
 venv/
 ENV/
 
+# Python virtualenv accidentally committed (old 3.14 env)
+backend/Lib/
+backend/Scripts/
+backend/include/
+backend/pyvenv.cfg
+
+# Model weight artifacts (delivered manually, not via git)
+backend/ai/models/*.zip
+
 # Python
 __pycache__/
 *.py[cod]
@@ -55,3 +64,7 @@ backend/uploads/
 *.model
 *.pkl
 backend/data/db/
+
+# Build artifacts & logs
+*.apk
+*.log
