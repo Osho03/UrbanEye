@@ -108,7 +108,11 @@ def get_patterns():
     weekday load profile and plain-language recommendations.
     """
     from datetime import datetime, timedelta
-    from ai.seasonal_mining import mine_patterns
+    try:
+        from ai.seasonal_mining import mine_patterns
+    except ImportError as e:
+        print(f"seasonal_mining unavailable: {e}")
+        return jsonify({"status": "unavailable", "message": "Pattern mining needs pandas on the server."})
 
     year_ago = datetime.now() - timedelta(days=365)
     issues = list(issues_collection.find(
@@ -121,5 +125,9 @@ def get_patterns():
 @analytics_bp.route("/priority-model", methods=["GET"])
 def priority_model_status():
     """Phase 4: is the self-training priority brain active yet?"""
-    from ai.priority_model import model_status
+    try:
+        from ai.priority_model import model_status
+    except ImportError as e:
+        print(f"priority_model unavailable: {e}")
+        return jsonify({"active": False, "reason": "Priority model needs scikit-learn/joblib on the server."})
     return jsonify(model_status())

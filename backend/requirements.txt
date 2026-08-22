@@ -6,3 +6,10 @@ pillow
 gunicorn
 requests
 google-generativeai
+
+# Phase 4: ML analytics (hotspots / seasonal mining / priority model)
+numpy
+pandas
+scikit-learn
+joblib
+opencv-python-headless
