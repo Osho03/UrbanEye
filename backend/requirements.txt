@@ -1,6 +1,7 @@
 flask
 flask-cors
 pymongo
+dnspython  # required by pymongo for mongodb+srv:// URIs
 python-dotenv
 pillow
 gunicorn
