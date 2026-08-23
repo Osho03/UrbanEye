@@ -15,7 +15,7 @@ import 'package:mime/mime.dart';
 import '../models/issue_model.dart';
 
 class ApiService {
-  static String baseUrl = 'https://urbaneye-backend-jiqq.onrender.com';
+  static String baseUrl = 'https://urbaneye-backend-kzb6.onrender.com';
 
   /// Configure base URL (call from settings)
   static void setBaseUrl(String url) {
