@@ -17,6 +17,14 @@ DEPARTMENT_RULES = {
     "streetlight": {
         "dept": "Electricity Department",
         "priority": "Medium"
+    },
+    "drainage": {
+        "dept": "Water Board",
+        "priority": "High"
+    },
+    "sidewalk_damage": {
+        "dept": "Road Department",
+        "priority": "Medium"
     }
 }
 

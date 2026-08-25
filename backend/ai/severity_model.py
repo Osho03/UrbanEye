@@ -26,6 +26,8 @@ def estimate_severity(image_path, issue_type):
             "water_leak": 7,  # Water is urgent
             "garbage": 3,
             "streetlight": 4,
+            "drainage": 5,  # Clogged drain can cause flooding
+            "sidewalk_damage": 4,  # Pedestrian safety risk
             "unknown": 1
         }
         base = base_scores.get(str(issue_type).lower(), 3)
