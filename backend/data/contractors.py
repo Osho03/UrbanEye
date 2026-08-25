@@ -17,7 +17,7 @@ CONTRACTORS = [
         "id": "CTR001",
         "name": "ABC Road Contractors Pvt Ltd",
         "specialty": "Roads & Infrastructure",
-        "specialties": ["Pothole", "Road Damage", "Sidewalk Damage"],
+        "specialties": ["pothole", "sidewalk_damage"],
         "rating": 4.5,
         "cost_rate": 500,  # ₹ per sq meter
         "available": True,
@@ -33,7 +33,7 @@ CONTRACTORS = [
         "id": "CTR002",
         "name": "XYZ Sanitation Services",
         "specialty": "Water & Sanitation",
-        "specialties": ["Water Leak", "Garbage Dump", "Drainage Issue"],
+        "specialties": ["water_leak", "garbage", "drainage"],
         "rating": 4.2,
         "cost_rate": 300,  # ₹ per unit
         "available": True,
@@ -49,7 +49,7 @@ CONTRACTORS = [
         "id": "CTR003",
         "name": "City Electricals & Lighting Co.",
         "specialty": "Electrical & Lighting",
-        "specialties": ["Streetlight", "Electrical Hazard"],
+        "specialties": ["streetlight"],
         "rating": 4.8,
         "cost_rate": 200,  # ₹ per unit
         "available": True,
@@ -65,7 +65,7 @@ CONTRACTORS = [
         "id": "CTR004",
         "name": "Metro General Contractors",
         "specialty": "General Maintenance",
-        "specialties": ["General", "Sidewalk Damage", "Public Property Damage"],
+        "specialties": ["sidewalk_damage", "pothole"],
         "rating": 3.9,
         "cost_rate": 400,  # ₹ per unit
         "available": False,  # Currently busy
@@ -81,7 +81,7 @@ CONTRACTORS = [
         "id": "CTR005",
         "name": "GreenCity Waste Management",
         "specialty": "Waste & Sanitation",
-        "specialties": ["Garbage Dump", "Drainage Issue"],
+        "specialties": ["garbage", "drainage"],
         "rating": 4.4,
         "cost_rate": 250,  # ₹ per unit
         "available": True,

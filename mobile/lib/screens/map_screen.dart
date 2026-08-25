@@ -373,6 +373,10 @@ class _MapScreenState extends State<MapScreen> {
         return Icons.water_drop;
       case 'streetlight':
         return Icons.light;
+      case 'drainage':
+        return Icons.water;
+      case 'sidewalk_damage':
+        return Icons.directions_walk;
       default:
         return Icons.report_problem_outlined;
     }

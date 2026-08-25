@@ -14,7 +14,9 @@ Output:
         ├── pothole/
         ├── garbage/
         ├── water_leak/
-        └── streetlight/
+        ├── streetlight/
+        ├── drainage/
+        └── sidewalk_damage/
 """
 
 import shutil
@@ -28,7 +30,7 @@ issues = db["issues"]
 
 # Dataset directory structure
 BASE_DATASET = "ai/dataset"
-CLASSES = ["pothole", "garbage", "water_leak", "streetlight"]
+CLASSES = ["pothole", "garbage", "water_leak", "streetlight", "drainage", "sidewalk_damage"]
 
 # Create class directories
 for class_name in CLASSES:
