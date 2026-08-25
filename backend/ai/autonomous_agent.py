@@ -38,7 +38,9 @@ DEPARTMENT_MAPPING = {
     "pothole": "Road Department",
     "garbage": "Sanitation Department",
     "water_leak": "Water Board",
-    "streetlight": "Electricity Department"
+    "streetlight": "Electricity Department",
+    "drainage": "Water Board",
+    "sidewalk_damage": "Road Department"
 }
 
 def process_pending_issues():

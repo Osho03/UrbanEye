@@ -49,19 +49,32 @@ def _get_model():
 
 
 # Maps trained class names to canonical UrbanEye issue types.
+# civic_v2 model outputs: garbage, pothole, water_leak, streetlight, drainage, sidewalk_damage
 CLASS_MAP = {
     "pothole": "pothole",
     "garbage": "garbage",
     "trash": "garbage",
     "waste": "garbage",
     "litter": "garbage",
-    "drainage": "water_leak",
-    "drain": "water_leak",
+    "drainage": "drainage",
+    "drain": "drainage",
+    "drain hole": "drainage",
+    "sewer": "drainage",
+    "manhole": "drainage",
     "water_leak": "water_leak",
+    "pipe leak": "water_leak",
     "water leak": "water_leak",
+    "leak": "water_leak",
     "streetlight": "streetlight",
     "street_light": "streetlight",
+    "street-lamp": "streetlight",
+    "street light": "streetlight",
+    "lightpost": "streetlight",
     "sidewalk_damage": "sidewalk_damage",
+    "sidewalk": "sidewalk_damage",
+    "edge break": "sidewalk_damage",
+    "crack": "sidewalk_damage",
+    "patch": "sidewalk_damage",
 }
 
 # Severity by area ratio (box area / image area) - resolution independent.
@@ -76,7 +89,15 @@ def _map_class(raw_name):
     key = str(raw_name).strip().lower()
     if key in CLASS_MAP:
         return CLASS_MAP[key]
-    for token, issue_type in (("poth", "pothole"), ("garb", "garbage"), ("trash", "garbage"), ("waste", "garbage")):
+    for token, issue_type in (
+        ("poth", "pothole"), ("garb", "garbage"), ("trash", "garbage"),
+        ("waste", "garbage"), ("litter", "garbage"),
+        ("leak", "water_leak"), ("water", "water_leak"),
+        ("drain", "drainage"), ("sewer", "drainage"), ("manhole", "drainage"),
+        ("street", "streetlight"), ("lamp", "streetlight"), ("light", "streetlight"),
+        ("sidewalk", "sidewalk_damage"), ("crack", "sidewalk_damage"),
+        ("patch", "sidewalk_damage"),
+    ):
         if token in key:
             return issue_type
     return None
