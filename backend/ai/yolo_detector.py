@@ -75,6 +75,18 @@ CLASS_MAP = {
     "edge break": "sidewalk_damage",
     "crack": "sidewalk_damage",
     "patch": "sidewalk_damage",
+    "0": "drainage",
+    "1": "garbage",
+    "2": "pothole",
+    "3": "sidewalk_damage",
+    "4": "streetlight",
+    "5": "water_leak",
+    "class0": "drainage",
+    "class1": "garbage",
+    "class2": "pothole",
+    "class3": "sidewalk_damage",
+    "class4": "streetlight",
+    "class5": "water_leak",
 }
 
 # Severity by area ratio (box area / image area) - resolution independent.
