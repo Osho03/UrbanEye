@@ -31,6 +31,7 @@ def report_issue():
     status = "Pending"
     linked_to = None
     admin_remarks = None
+    detection_confidence = 0.0
     
     try:
         image = request.files.get("image")
@@ -120,6 +121,7 @@ def report_issue():
                 
                 if yolo_result:
                     issue_type = yolo_result["issue_type"]
+                    detection_confidence = yolo_result.get("confidence", 0.0)
                     severity_data = {
                         "score": 3 if yolo_result["severity_score"] == "High" else (2 if yolo_result["severity_score"] == "Medium" else 1),
                         "label": yolo_result["severity_score"],
@@ -149,8 +151,10 @@ def report_issue():
                             issue_type = ai_result.get("primary_guess", "unknown")
                         else:
                             issue_type = "unknown"
+                        detection_confidence = ai_result.get("confidence", 0.0) if isinstance(ai_result, dict) else 0.0
                     else:
                         issue_type = ai_result if ai_result else "unknown"
+                        detection_confidence = 0.0
                     
                     # Phase 5: AI Severity Estimation
                     from ai.severity_model import estimate_severity
@@ -299,7 +303,7 @@ def report_issue():
         "priority": routing["priority"],
         "severity_score": severity_data["score"],
         "severity_label": severity_data["label"],
-        "confidence": 98.5 if issue_type != "unknown" else 0,
+        "confidence": detection_confidence,
         "status": status,
     }
     
