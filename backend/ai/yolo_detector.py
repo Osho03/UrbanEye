@@ -36,6 +36,12 @@ def _resolve_weights():
 def _get_model():
     global model, USING_CUSTOM
     if model is None and YOLO_AVAILABLE:
+        # Keep native thread count low to limit memory on low-RAM hosts (Render free).
+        try:
+            import torch
+            torch.set_num_threads(1)
+        except Exception:
+            pass
         weights, custom = _resolve_weights()
         if weights:
             try:
