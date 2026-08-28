@@ -14,3 +14,11 @@ pandas
 scikit-learn
 joblib
 opencv-python-headless
+
+# Phase 5: YOLOv8 object detection (civic issue detection)
+ultralytics
+torch
+torchvision
+
+# Phase: local MobileNetV2 classifier fallback
+tensorflow-cpu

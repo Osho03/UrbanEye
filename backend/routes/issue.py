@@ -148,12 +148,15 @@ def report_issue():
                         if ai_result.get("status") == "confident":
                             issue_type = ai_result.get("detected_type", "unknown")
                         elif ai_result.get("status") == "uncertain":
-                            issue_type = ai_result.get("primary_guess", "unknown")
+                            # HONEST AI: do NOT present a low-confidence guess as the
+                            # detected problem. Report unknown so a wrong name is never shown.
+                            print(f"⚠️ Low confidence ({ai_result.get('confidence', 0)}%) - reporting unknown")
+                            issue_type = "unknown"
                         else:
                             issue_type = "unknown"
                         detection_confidence = ai_result.get("confidence", 0.0) if isinstance(ai_result, dict) else 0.0
                     else:
-                        issue_type = ai_result if ai_result else "unknown"
+                        issue_type = ai_result if ai_result and ai_result != "unknown" else "unknown"
                         detection_confidence = 0.0
                     
                     # Phase 5: AI Severity Estimation
@@ -199,10 +202,14 @@ def report_issue():
                         # Flatten for backward compatibility
                         triage = agentic_result.get("triage", {})
                         if triage.get("valid_complaint"):
-                             issue_type = triage.get("issue_type", issue_type)
+                             # Only use agentic text label if the vision model found nothing.
+                             # The trained YOLO/MobileNet detection is authoritative.
+                             triage_type = triage.get("issue_type")
+                             if not issue_type or issue_type == "unknown":
+                                 issue_type = triage_type or issue_type
                              routing["dept"] = triage.get("assigned_department", routing["dept"])
                              routing["priority"] = triage.get("priority_level", routing["priority"])
-                             ai_summary_text = f"[AGENTIC DECISION] {triage.get('issue_type')} - {triage.get('priority_level')}\nPolicy: {agentic_result.get('policy', {}).get('applicable_policy')}"
+                             ai_summary_text = f"[AGENTIC DECISION] {triage_type} - {triage.get('priority_level')}\nPolicy: {agentic_result.get('policy', {}).get('applicable_policy')}"
                     except Exception as e:
                         print(f"❌ Agentic Pipeline Failed: {e}")
                         ai_summary_text = "Agentic AI Error"

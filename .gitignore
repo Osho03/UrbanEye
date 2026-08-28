@@ -59,10 +59,10 @@ coverage/
 
 # Large files / uploads
 backend/uploads/
-*.pt
 *.h5
 *.model
 *.pkl
+*.bak
 priority_model_meta.json
 backend/data/db/
 
