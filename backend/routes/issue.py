@@ -141,28 +141,17 @@ def report_issue():
                         severity_data["details"]["annotated"] = True
                         print(f"🖼️ Annotated evidence saved: {detected_image}")
                 else:
-                    # FALLBACK: Use existing MobileNetV2 classifier
-                    ai_result = classify_issue(image_path)
-                    
-                    if isinstance(ai_result, dict):
-                        if ai_result.get("status") == "confident":
-                            issue_type = ai_result.get("detected_type", "unknown")
-                        elif ai_result.get("status") == "uncertain":
-                            # HONEST AI: do NOT present a low-confidence guess as the
-                            # detected problem. Report unknown so a wrong name is never shown.
-                            print(f"⚠️ Low confidence ({ai_result.get('confidence', 0)}%) - reporting unknown")
-                            issue_type = "unknown"
-                        else:
-                            issue_type = "unknown"
-                        detection_confidence = ai_result.get("confidence", 0.0) if isinstance(ai_result, dict) else 0.0
-                    else:
-                        issue_type = ai_result if ai_result and ai_result != "unknown" else "unknown"
-                        detection_confidence = 0.0
+                    # YOLO found nothing. The trained YOLO model is the ONLY detector
+                    # used in production (user requirement). Loading the TensorFlow
+                    # classifier here crashes low-memory Render workers, so we report
+                    # "unknown" honestly rather than a wrong label.
+                    print("⚠️ YOLO found no civic issue - reporting unknown")
+                    issue_type = "unknown"
+                    detection_confidence = 0.0
                     
                     # Phase 5: AI Severity Estimation
                     from ai.severity_model import estimate_severity
                     severity_data = estimate_severity(image_path, issue_type)
-                    print(f"⚠️ YOLO Failed. Fallback to MobileNetV2: {issue_type}")
 
                 # NEW: Civic Impact Radius Calculation
                 from ai.impact_radius import calculate_impact_radius
