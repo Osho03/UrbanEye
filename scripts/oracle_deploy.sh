@@ -39,17 +39,20 @@ else
 fi
 pip install -r requirements.txt
 
-# --- 4. Environment variables ---
-echo "[4/6] Writing .env (edit this file with your real keys)..."
+# --- 4. Environment variables (prompted, never stored in this script) ---
+echo "[4/6] Configuring MONGO_URI + GEMINI_API_KEY..."
 if [ ! -f .env ]; then
-  cat > .env <<'EOF'
-# UrbanEye - Oracle Cloud
-# >>> EDIT THESE with your real values <<<
-MONGO_URI=mongodb+srv://oshomani2006_db_user:YOUR_MONGO_PASSWORD@cluster0.o4vinqh.mongodb.net/?retryWrites=true&writes=true&appName=cluster0
-GEMINI_API_KEY=AIzaSyA5Cei2ld_I2BQU8qvVdJ-SnOJL-SJfL6s
+  read -rp "Paste your MONGO_URI (mongodb+srv://...): " MONGO_URI
+  if [ -z "$MONGO_URI" ]; then echo "MONGO_URI is required."; exit 1; fi
+  read -rp "Paste your Gemini API key: " GEMINI_API_KEY
+  if [ -z "$GEMINI_API_KEY" ]; then echo "GEMINI_API_KEY is required."; exit 1; fi
+  cat > .env <<EOF
+MONGO_URI=$MONGO_URI
+GEMINI_API_KEY=$GEMINI_API_KEY
 PORT=5000
 EOF
-  echo "  -> Created .env - open it and set MONGO_URI password + GEMINI key"
+  chmod 600 .env
+  echo "  -> .env written (permissions 600)"
 else
   echo "  -> .env already exists, leaving it"
 fi

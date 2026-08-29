@@ -1,10 +1,14 @@
 import google.generativeai as genai
 import os
+import sys
 
-# usage: py -3.13 debug_gemini.py
+# usage: py -3.13 debug_gemini.py   (set GEMINI_API_KEY env var)
 
 def test_gemini():
-    api_key = "AIzaSyA5Cei2ld_I2BQU8qvVdJ-SnOJL-SJfL6s"
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        print("GEMINI_API_KEY env var is not set.")
+        sys.exit(1)
     print(f"Testing Gemini with key: {api_key[:10]}...")
     
     try:

@@ -49,6 +49,9 @@ def report_issue():
         import uuid
         import time
         ext = os.path.splitext(image.filename)[1]
+        # .jfif is a JPEG that ultralytics/OpenCV cannot open -> save as .jpg
+        if ext.lower() in ("", ".jfif"):
+            ext = ".jpg"
         unique_filename = f"{int(time.time())}_{uuid.uuid4().hex[:8]}{ext}"
         image_path = os.path.join(UPLOAD_FOLDER, unique_filename)
         
