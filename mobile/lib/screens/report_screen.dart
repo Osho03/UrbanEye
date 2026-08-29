@@ -321,7 +321,9 @@ class _ReportScreenState extends State<ReportScreen> {
                   highlight: true),
               _InsightRow(
                   label: 'CONFIDENCE',
-                  value: '${result['confidence'] ?? 98.5}%'),
+                  value: result['confidence'] is num
+                      ? '${((result['confidence'] as num) * 100).toStringAsFixed(1)}%'
+                      : '${result['confidence'] ?? 98.5}%'),
               _InsightRow(
                   label: 'DEPARTMENT',
                   value: result['assigned_department'] ?? 'Auto-routing...'),
