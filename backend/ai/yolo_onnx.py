@@ -31,6 +31,20 @@ _session = None
 _CONF = 0.25
 _IOU = 0.45
 
+# Per-class confidence floors. The nano model is weak at night/low-light
+# scenes, so junk boxes (a dark road patch misread as pothole, a dim blob
+# misread as streetlight) were passing the old 0.25 floor and topping the
+# highest-confidence pick. These floors reject most false positives while
+# keeping the true positives seen in the real dataset.
+_CLASS_CONF = {
+    0: 0.30,  # garbage
+    1: 0.40,  # pothole
+    2: 0.30,  # water_leak
+    3: 0.30,  # streetlight
+    4: 0.30,  # drainage
+    5: 0.30,  # sidewalk_damage
+}
+
 
 def available():
     return ONNX_AVAILABLE and CV2_AVAILABLE and os.path.exists(_MODEL_PATH)
@@ -110,7 +124,8 @@ def predict(image_path):
     scores = preds[4:]         # per-class scores, shape (nc, 8400)
     confs = scores.max(axis=0)
     cls_ids = scores.argmax(axis=0)
-    mask = confs >= _CONF
+    thr = np.array([_CLASS_CONF.get(c, _CONF) for c in range(scores.shape[0])])
+    mask = confs >= thr[cls_ids]
     if not mask.any():
         return None
 

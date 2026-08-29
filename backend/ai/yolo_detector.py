@@ -140,6 +140,37 @@ def _severity_for(ratio, num_detections):
     return "Low", 500
 
 
+# Minimum confidence to assert a single class. Below this we say "unknown"
+# instead of guessing wrong (e.g. a junk pothole at 0.31 heading an image).
+MIN_ASSERT_CONF = 0.40
+# If the top two different classes are within this margin, the scene is
+# ambiguous - report unknown rather than assert one side wrongly.
+AMBIGUITY_MARGIN = 0.10
+
+
+def _pick_primary(detections):
+    """Return the highest-confidence detection, or None when weak/ambiguous.
+
+    Prevents confidently-wrong labels (streetlight photo ending up as
+    'pothole' because a dark road patch got a slightly higher score).
+    """
+    best = max(detections, key=lambda d: d["confidence"])
+    if best["confidence"] < MIN_ASSERT_CONF:
+        print(f"[yolo_detector] Too weak to assert '{best['issue_type']}' "
+              f"({best['confidence']:.2f} < {MIN_ASSERT_CONF}) -> unknown")
+        return None
+    runners = [d for d in detections
+               if d["issue_type"] != best["issue_type"]
+               and d["confidence"] >= MIN_ASSERT_CONF - 0.10]
+    if runners and (best["confidence"] - max(r["confidence"] for r in runners)) < AMBIGUITY_MARGIN:
+        other = max(runners, key=lambda r: r["confidence"])
+        print(f"[yolo_detector] Ambiguous: '{best['issue_type']}' "
+              f"({best['confidence']:.2f}) vs '{other['issue_type']}' "
+              f"({other['confidence']:.2f}) -> unknown")
+        return None
+    return best
+
+
 def _onnx_detect(image_path):
     """Detect with civic_yolov8.onnx via onnxruntime (no torch import)."""
     if _onnx_predict is None or not _onnx_available():
@@ -171,7 +202,9 @@ def _onnx_detect(image_path):
     if not detections:
         return None
 
-    primary = max(detections, key=lambda d: d["confidence"])
+    primary = _pick_primary(detections)
+    if primary is None:
+        return None
     severity, cost = _severity_for(primary["area_ratio"], len(detections))
 
     return {
@@ -241,8 +274,11 @@ def detect_issue(image_path):
         if not detections:
             return None
 
-        # Primary detection = highest confidence among civic classes.
-        primary = max(detections, key=lambda d: d["confidence"])
+        # Primary detection = highest confidence among civic classes,
+        # guarded against weak/ambiguous picks (see _pick_primary).
+        primary = _pick_primary(detections)
+        if primary is None:
+            return None
         severity, cost = _severity_for(primary["area_ratio"], len(detections))
 
         return {
