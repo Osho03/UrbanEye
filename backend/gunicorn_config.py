@@ -7,8 +7,9 @@ import os
 # FORCE port 5000 to match Render's scan (Hammer Fix)
 bind = "0.0.0.0:5000"
 
-# Workers: Reduced to 2 for Render Free Tier stability
-workers = 2
+# Workers: Single worker so only ONE copy of torch+YOLO is resident
+# (Render free tier has 512MB; a second worker doubles torch memory and OOMs).
+workers = 1
 
 # Worker Class: Use 'gevent' or 'eventlet' for high I/O concurrency 
 # (Requires gevent/eventlet in requirements.txt)
