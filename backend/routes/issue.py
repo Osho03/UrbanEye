@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from flask import Blueprint, request, jsonify
 from config import issues_collection
 from datetime import datetime
@@ -7,6 +8,21 @@ issue_bp = Blueprint("issue", __name__)
 
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+
+def _pyval(v):
+    """Recursively convert numpy scalars to native Python types (MongoDB-safe)."""
+    if v is None or isinstance(v, (bool, str, bytes)):
+        return v
+    if isinstance(v, (np.integer,)):
+        return int(v)
+    if isinstance(v, (np.floating,)):
+        return float(v)
+    if isinstance(v, dict):
+        return {k: _pyval(x) for k, x in v.items()}
+    if isinstance(v, (list, tuple, set)):
+        return [_pyval(x) for x in v]
+    return v
 
 @issue_bp.route("/report", methods=["POST"])
 def report_issue():
@@ -259,6 +275,8 @@ def report_issue():
         }]
     }
 
+    issue = _pyval(issue)
+
     result = issues_collection.insert_one(issue)
     issue_id = str(result.inserted_id)
     
@@ -310,7 +328,7 @@ def report_issue():
         response_data["message"] = "Issue linked to existing report"
         response_data["linked_to"] = linked_to
         
-    return jsonify(response_data)
+    return jsonify(_pyval(response_data))
 
 @issue_bp.route("/all", methods=["GET"])
 def get_all_issues():
