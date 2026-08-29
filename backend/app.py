@@ -43,6 +43,44 @@ def health_db():
         return {"db": "UNREACHABLE", "uri": masked,
                 "error": f"{type(e).__name__}: {e}"}, 200
 
+
+@app.route("/api/health/yolo")
+def health_yolo():
+    """Temporary diagnostics: run the exact YOLO image path used by report."""
+    import traceback
+    info = {}
+    for name in ("yolo_detector", "yolo_onnx", "annotate",
+                 "metadata_forensics", "duplicate_detector"):
+        try:
+            __import__(f"ai.{name}", fromlist=["*"])
+            info[name] = "ok"
+        except Exception as e:
+            info[name] = f"IMPORT FAIL: {type(e).__name__}: {e}"
+    try:
+        import cv2
+        info["cv2"] = cv2.__version__
+        import numpy as np
+        import onnxruntime
+        info["onnxruntime"] = onnxruntime.__version__
+    except Exception as e:
+        info["libs"] = f"{type(e).__name__}: {e}"
+
+    import os
+    info["onnx_exists"] = os.path.isabs("a") or os.path.exists(
+        os.path.join("ai", "models", "civic_yolov8.onnx"))
+    info["pt_exists"] = os.path.exists(
+        os.path.join("ai", "models", "civic_yolov8.pt"))
+    try:
+        from ai.yolo_detector import detect_issue
+        arr = (np.random.rand(320, 320, 3) * 255).astype("uint8")
+        tmp = os.path.join(os.getcwd(), "_yolo_diag.png")
+        cv2.imwrite(tmp, arr)
+        info["detect_result"] = detect_issue(tmp)
+        os.remove(tmp) if os.path.exists(tmp) else None
+    except Exception as e:
+        info["DETECT_FAIL"] = f"{type(e).__name__}: {e}\n{traceback.format_exc()}"
+    return info, 200
+
 @app.errorhandler(500)
 def handle_500(error):
     return jsonify({"error": "Internal Server Error", "message": str(error)}), 500
