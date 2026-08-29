@@ -1,0 +1,68 @@
+URBANEYE RETRAIN - TODO FOR TOMORROW
+====================================
+(read this first, then continue talking to the assistant in the same chat)
+
+WHAT HAPPENED TODAY (in one line)
+---------------------------------
+The streetlight->pothole bug exists because the old model was too weak
+(yolov8n, 50 epochs, only ~426 streetlight images). We prepared an improved
+notebook, tried training on Colab, but the session's kernel got interrupted
+and no trained model files were saved. The dataset downloads/merge are fine.
+
+GOAL TOMORROW
+-------------
+Train the new model completely (yolov8s, 150 epochs, balanced classes,
+streetlight gets equal attention) so streetlight photos are detected correctly.
+
+EXACT STEPS IN GOOGLE COLAB (tomorrow)
+--------------------------------------
+1. Open https://colab.research.google.com
+2. Sign in with the SAME Google account used today.
+3. File > Open notebook > pick:  retrain_civic_yolov8_v3.ipynb
+   (it is already saved in your Drive from today - do NOT re-upload a new one)
+4. Menu: Runtime > Change runtime type > GPU (T4).
+5. Find the CONFIG cell. Replace the text inside it:
+       PASTE_YOUR_FREE_ROBOFLOW_API_KEY_HERE
+   with your Roboflow API key. Key page: https://app.roboflow.com/settings/api
+   (if you lost the key, create a new FREE key there and paste it)
+6. Menu: Runtime > Run all.
+7. LET IT RUN COMPLETELY. ~3-5 hours.
+   - KEEP THE BROWSER TAB OPEN. Do not press Stop. Do not close the tab.
+   - Do NOT press "Run all" a second time while it is already working.
+8. When everything finishes, the SANITY cell will ask you to UPLOAD photos:
+   upload YOUR NIGHT STREETLIGHT PHOTO (the one that said "pathhole")
+   + a day streetlight photo + a pothole photo.
+   It will print what the NEW model detects. We want "streetlight".
+9. The last EXPORT cell downloads 2 files automatically:
+   - civic_yolov8.pt
+   - civic_yolov8.onnx
+   (watch for the download toolbar at the bottom-left of that cell)
+
+IF IT GETS INTERRUPTED / DISCONNECTS AGAIN IN THE MIDDLE
+---------------------------------------------------------
+- If it happens DURING training: the tab will show cells stopped.
+  Do NOT start over by clicking Run all.
+  In a NEW code cell, paste this and run it (it continues from the last
+  saved checkpoint instead of restarting):
+      from ultralytics import YOLO
+      YOLO("/content/runs/civic_v3/weights/last.pt").train(resume=True)
+- If it says the runtime/session was reset (files gone): re-open the notebook
+  and start from step 4 again.
+
+AFTER THE DOWNLOADS COMPLETE
+----------------------------
+1. Find the 2 downloaded files in your browser Downloads folder.
+2. Copy them to:  C:\Users\acer\Desktop\urbaneye\UrbanEye\backend\ai\models\
+   replacing the old civic_yolov8.onnx and civic_yolov8.pt.
+3. Open PowerShell and run:
+   cd C:\Users\acer\Desktop\urbaneye\UrbanEye
+   git add backend/ai/models
+   git commit -m "model v3"
+   git push
+4. Come back to the assistant chat and type:  model updated
+   The assistant will verify the live backend detects streetlight correctly.
+
+WHY WE DO THIS (quick reminder)
+-------------------------------
+Bigger model (s) + more training rounds (150) + balanced data = the AI can
+finally tell a streetlight at night apart from darkness/pothole-looking areas.
