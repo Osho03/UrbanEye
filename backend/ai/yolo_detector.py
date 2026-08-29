@@ -12,6 +12,16 @@ except ImportError:
 
 import os
 
+# Lightweight ONNX Runtime path (no torch). Preferred on low-RAM hosts.
+try:
+    from .yolo_onnx import predict as _onnx_predict, available as _onnx_available
+except Exception:
+    try:
+        from ai.yolo_onnx import predict as _onnx_predict, available as _onnx_available
+    except Exception:
+        _onnx_predict = None
+        _onnx_available = lambda: False
+
 # Custom civic-trained weights take priority; stock COCO weights are fallback.
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_CANDIDATES = [
@@ -130,6 +140,54 @@ def _severity_for(ratio, num_detections):
     return "Low", 500
 
 
+def _onnx_detect(image_path):
+    """Detect with civic_yolov8.onnx via onnxruntime (no torch import)."""
+    if _onnx_predict is None or not _onnx_available():
+        return None
+    try:
+        result = _onnx_predict(image_path)
+    except Exception as e:
+        print(f"[yolo_detector] ONNX detection error: {e}")
+        return None
+    if not result:
+        return None
+
+    img_area = float(result["height"] * result["width"])
+    detections = []
+    for det in result["detections"]:
+        issue_type = _map_class(det["name"])
+        if issue_type is None:
+            continue
+        x1, y1, x2, y2 = det["box"]
+        area = max(x2 - x1, 1) * max(y2 - y1, 1)
+        detections.append({
+            "issue_type": issue_type,
+            "bounding_box": det["box"],
+            "area_pixels": round(area, 2),
+            "area_ratio": round(area / img_area, 4),
+            "confidence": det["confidence"],
+        })
+
+    if not detections:
+        return None
+
+    primary = max(detections, key=lambda d: d["confidence"])
+    severity, cost = _severity_for(primary["area_ratio"], len(detections))
+
+    return {
+        "issue_type": primary["issue_type"],
+        "bounding_box": primary["bounding_box"],
+        "detected_area_pixels": primary["area_pixels"],
+        "area_ratio": primary["area_ratio"],
+        "num_detections": len(detections),
+        "detections": detections,
+        "severity_score": severity,
+        "estimated_repair_cost": cost,
+        "confidence": primary["confidence"],
+        "model_source": "custom_onnx",
+    }
+
+
 def detect_issue(image_path):
     """
     Detect civic issues using YOLOv8.
@@ -146,6 +204,10 @@ def detect_issue(image_path):
     Returns None when ultralytics/weights are unavailable or nothing maps
     to a known civic issue type.
     """
+    onnx_result = _onnx_detect(image_path)
+    if onnx_result:
+        return onnx_result
+
     yolo_model = _get_model()
     if not yolo_model or not CV2_AVAILABLE:
         return None
