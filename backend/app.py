@@ -143,7 +143,20 @@ def health_flow():
 
 @app.errorhandler(500)
 def handle_500(error):
-    return jsonify({"error": "Internal Server Error", "message": str(error)}), 500
+    import traceback
+    import sys as _sys
+    detail = []
+    detail.append(f"repr={error!r}")
+    for attr in ("original_exception", "exc", "original_error"):
+        val = getattr(error, attr, None)
+        if val is not None:
+            detail.append(f"{attr}={type(val).__name__}: {val}")
+    try:
+        detail.append("".join(traceback.format_exception(*_sys.exc_info())))
+    except Exception:
+        pass
+    return jsonify({"error": "Internal Server Error", "message": str(error),
+                    "detail": detail}), 500
 
 # Try/Except for Chatbot to prevent crash
 try:
