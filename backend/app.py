@@ -81,6 +81,66 @@ def health_yolo():
         info["DETECT_FAIL"] = f"{type(e).__name__}: {e}\n{traceback.format_exc()}"
     return info, 200
 
+
+@app.route("/api/health/flow", methods=["POST"])
+def health_flow():
+    """Temp: trace each image-branch step of /api/issues/report on a real upload."""
+    import os
+    import traceback
+    from flask import request
+    out = {}
+    img = request.files.get("image")
+    if not img:
+        return {"error": "no image"}, 400
+    ext = os.path.splitext(img.filename)[1]
+    if ext.lower() in ("", ".jfif"):
+        ext = ".jpg"
+    os.makedirs("uploads", exist_ok=True)
+    p = os.path.join("uploads", "_flow_diag" + ext)
+    img.save(p)
+
+    try:
+        from ai.duplicate_detector import compute_dhash, find_potential_duplicate
+        h = compute_dhash(p)
+        out["dhash"] = h
+        dupe = find_potential_duplicate(h, 12.97, 77.59)
+        out["duplicate"] = None if not dupe else dupe.get("_id")
+    except Exception as e:
+        out["dhash"] = f"FAIL {type(e).__name__}: {e}\n{traceback.format_exc()}"
+
+    r = None
+    try:
+        from ai.yolo_detector import detect_issue
+        r = detect_issue(p)
+        out["detect"] = (r["issue_type"], r["confidence"], r["model_source"]) if r else None
+    except Exception as e:
+        out["detect"] = f"FAIL {type(e).__name__}: {e}\n{traceback.format_exc()}"
+
+    try:
+        from ai.annotate import annotate_detection
+        out["annotate"] = annotate_detection(p, r) if r else "skip (no detect)"
+    except Exception as e:
+        out["annotate"] = f"FAIL {type(e).__name__}: {e}\n{traceback.format_exc()}"
+
+    try:
+        from ai.metadata_forensics import analyze_metadata
+        out["forensics"] = analyze_metadata(p)
+    except Exception as e:
+        out["forensics"] = f"FAIL {type(e).__name__}: {e}\n{traceback.format_exc()}"
+
+    try:
+        from ai.impact_radius import calculate_impact_radius
+        from routes.routing import get_routing_info
+        sev = r["severity_score"] if r else "Low"
+        out["impact"] = calculate_impact_radius(12.97, 77.59, sev)
+        out["routing"] = get_routing_info(r["issue_type"] if r else "unknown")
+    except Exception as e:
+        out["post"] = f"FAIL {type(e).__name__}: {e}\n{traceback.format_exc()}"
+
+    if p and os.path.exists(p):
+        os.remove(p)
+    return out, 200
+
 @app.errorhandler(500)
 def handle_500(error):
     return jsonify({"error": "Internal Server Error", "message": str(error)}), 500
