@@ -9,6 +9,11 @@ issue_bp = Blueprint("issue", __name__)
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# When YOLO returns a label but its confidence is below this, ask the free
+# Gemini vision verifier to double-check so the app never shows a
+# confidently-wrong problem name.
+GEMINI_VERIFY_CONF = 0.55
+
 
 def _pyval(v):
     """Recursively convert numpy scalars to native Python types (MongoDB-safe)."""
@@ -141,6 +146,29 @@ def report_issue():
                 if yolo_result:
                     issue_type = yolo_result["issue_type"]
                     detection_confidence = yolo_result.get("confidence", 0.0)
+
+                    # Free Gemini VERIFIER: when YOLO is unsure of its own
+                    # label (below GEMINI_VERIFY_CONF), ask Gemini to look at
+                    # the photo too. Gemini only overrides when it is MORE
+                    # confident, so a confident low false-positive never wins.
+                    if detection_confidence < GEMINI_VERIFY_CONF:
+                        try:
+                            from ai.gemini_vision import classify_image
+                            gem = classify_image(image_path)
+                        except Exception as e:
+                            print(f"⚠️ Gemini verifier unavailable: {e}")
+                            gem = None
+                        if gem and gem.get("issue_type") not in (None, "unknown"):
+                            g_conf = float(gem.get("confidence", 0.0))
+                            if gem["issue_type"] == issue_type:
+                                print(f"✅ Gemini verifier agrees with YOLO: {issue_type}")
+                            elif g_conf > detection_confidence:
+                                print(f"✅ Gemini verifier override: "
+                                      f"{issue_type} ({detection_confidence:.2f}) -> "
+                                      f"{gem['issue_type']} ({g_conf:.2f})")
+                                issue_type = gem["issue_type"]
+                                detection_confidence = round(g_conf, 3)
+
                     severity_data = {
                         "score": 3 if yolo_result["severity_score"] == "High" else (2 if yolo_result["severity_score"] == "Medium" else 1),
                         "label": yolo_result["severity_score"],

@@ -281,7 +281,24 @@ class _ReportScreenState extends State<ReportScreen> {
     }
   }
 
-  void _showAIInsightDialog(Map<String, dynamic> result) {
+  /// Pretty-print a backend issue_type like "water_leak" -> "Water Leak".
+String _prettyIssueName(dynamic value) {
+  if (value == null || (value is String && value.trim().isEmpty)) {
+    return 'Not recognized';
+  }
+  final text = value.toString().trim();
+  if (text.isEmpty || text.toLowerCase() == 'unknown') {
+    return 'Not recognized';
+  }
+  return text
+      .replaceAll('_', ' ')
+      .split(' ')
+      .where((w) => w.isNotEmpty)
+      .map((w) => w[0].toUpperCase() + w.substring(1).toLowerCase())
+      .join(' ');
+}
+
+void _showAIInsightDialog(Map<String, dynamic> result) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -317,7 +334,7 @@ class _ReportScreenState extends State<ReportScreen> {
               const SizedBox(height: 20),
               _InsightRow(
                   label: 'DETECTED',
-                  value: result['issue_type'] ?? 'Processing...',
+                  value: _prettyIssueName(result['issue_type']),
                   highlight: true),
               _InsightRow(
                   label: 'CONFIDENCE',
