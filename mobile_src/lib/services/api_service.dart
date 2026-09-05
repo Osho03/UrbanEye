@@ -1,4 +1,5 @@
 /// API Service for UrbanEye - Communicates with Flask Backend
+library;
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -148,8 +149,9 @@ class ApiService {
     request.fields['address'] = address ?? 'Unknown Location';
     request.fields['reported_by'] = reportedBy;
     if (reporterEmail != null) request.fields['reporter_email'] = reporterEmail;
-    if (voiceTranscript != null)
+    if (voiceTranscript != null) {
       request.fields['voice_transcript'] = voiceTranscript;
+    }
 
     final streamedResponse = await request.send();
     final response = await http.Response.fromStream(streamedResponse);

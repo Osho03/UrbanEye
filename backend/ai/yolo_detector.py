@@ -5,7 +5,7 @@ except ImportError:
     CV2_AVAILABLE = False
 
 try:
-    from ultralytics import YOLO
+    from ultralytics import YOLO  # type: ignore
     YOLO_AVAILABLE = True
 except ImportError:
     YOLO_AVAILABLE = False
@@ -48,7 +48,7 @@ def _get_model():
     if model is None and YOLO_AVAILABLE:
         # Keep native thread count low to limit memory on low-RAM hosts (Render free).
         try:
-            import torch
+            import torch  # type: ignore
             torch.set_num_threads(1)
         except Exception:
             pass
@@ -142,7 +142,7 @@ def _severity_for(ratio, num_detections):
 
 # Minimum confidence to assert a single class. Below this we say "unknown"
 # instead of guessing wrong (e.g. a junk pothole at 0.31 heading an image).
-MIN_ASSERT_CONF = 0.40
+MIN_ASSERT_CONF = 0.32
 # If the top two different classes are within this margin, the scene is
 # ambiguous - report unknown rather than assert one side wrongly.
 AMBIGUITY_MARGIN = 0.10

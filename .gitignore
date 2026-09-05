@@ -29,6 +29,7 @@ htmlcov/
 .pub-cache/
 .pub/
 build/
+.flutter-plugins-dependencies
 ios/.generated/
 android/.gradle/
 android/local.properties

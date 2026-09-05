@@ -38,7 +38,7 @@ _IOU = 0.45
 # keeping the true positives seen in the real dataset.
 _CLASS_CONF = {
     0: 0.30,  # garbage
-    1: 0.40,  # pothole
+    1: 0.32,  # pothole
     2: 0.30,  # water_leak
     3: 0.30,  # streetlight
     4: 0.30,  # drainage

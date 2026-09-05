@@ -1,4 +1,5 @@
 /// Report Screen - Camera + GPS + Voice + Submit
+library;
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';

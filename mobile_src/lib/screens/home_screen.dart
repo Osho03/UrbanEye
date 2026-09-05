@@ -1,4 +1,5 @@
 /// Home Screen - Dashboard with quick actions
+library;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +14,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0;
+  final int _currentIndex = 0;
   Map<String, dynamic> _stats = {};
   bool _isBackendConnected = false;
   bool _isLoading = true;
