@@ -160,17 +160,35 @@ def report_issue():
                         severity_data["details"]["annotated"] = True
                         print(f"🖼️ Annotated evidence saved: {detected_image}")
                 else:
-                    # YOLO found nothing. The trained YOLO model is the ONLY detector
-                    # used in production (user requirement). Loading the TensorFlow
-                    # classifier here crashes low-memory Render workers, so we report
-                    # "unknown" honestly rather than a wrong label.
-                    print("⚠️ YOLO found no civic issue - reporting unknown")
-                    issue_type = "unknown"
-                    detection_confidence = 0.0
-                    
-                    # Phase 5: AI Severity Estimation
-                    from ai.severity_model import estimate_severity
-                    severity_data = estimate_severity(image_path, issue_type)
+                    # YOLO found nothing. The trained YOLO model stays the
+                    # primary detector; as a free backup, ask Gemini vision
+                    # to name what it sees so the app still shows a class
+                    # instead of "unknown". Skipped when no GEMINI_API_KEY
+                    # is configured, keeping the old behaviour unchanged.
+                    try:
+                        from ai.gemini_vision import classify_image
+                        gemini_result = classify_image(image_path)
+                    except Exception as e:
+                        print(f"⚠️ Gemini vision unavailable: {e}")
+                        gemini_result = None
+
+                    if gemini_result and gemini_result.get("issue_type") not in (None, "unknown"):
+                        issue_type = gemini_result["issue_type"]
+                        detection_confidence = float(gemini_result.get("confidence", 0.5))
+                        print(f"✅ Gemini Vision fallback: {issue_type} (conf={detection_confidence})")
+
+                        # Phase 5: AI Severity Estimation (with the real type)
+                        from ai.severity_model import estimate_severity
+                        severity_data = estimate_severity(image_path, issue_type)
+                        severity_data["details"]["method"] = "gemini_fallback"
+                    else:
+                        print("⚠️ YOLO found no civic issue - reporting unknown")
+                        issue_type = "unknown"
+                        detection_confidence = 0.0
+
+                        # Phase 5: AI Severity Estimation
+                        from ai.severity_model import estimate_severity
+                        severity_data = estimate_severity(image_path, issue_type)
 
                 # NEW: Civic Impact Radius Calculation
                 from ai.impact_radius import calculate_impact_radius
