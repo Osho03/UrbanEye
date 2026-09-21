@@ -45,6 +45,38 @@ CLASS_CONF = {0: 0.30, 1: 0.32, 2: 0.30, 3: 0.30, 4: 0.30, 5: 0.30}
 
 IMG_EXT = (".jpg", ".jpeg", ".png", ".jfif", ".webp")
 
+# Async "Run benchmark" job state (started from the app card button).
+_benchmark_job = {"running": False, "started_at": None, "finished_at": None}
+
+
+def benchmark_status():
+    """Live status of the async benchmark job for the app card."""
+    return dict(_benchmark_job)
+
+
+def start_benchmark_async():
+    """Kick off run_evaluation() in a background thread. Non-blocking and
+    never runs two benchmarks at once."""
+    if _benchmark_job["running"]:
+        return {"status": "already_running"}
+    from threading import Thread
+    from datetime import datetime as _dt
+
+    def _worker():
+        _benchmark_job["running"] = True
+        _benchmark_job["started_at"] = _dt.now().isoformat(timespec="seconds")
+        _benchmark_job["finished_at"] = None
+        try:
+            run_evaluation()
+        except Exception as e:
+            print(f"[evaluator] benchmark failed: {e}")
+        finally:
+            _benchmark_job["running"] = False
+            _benchmark_job["finished_at"] = _dt.now().isoformat(timespec="seconds")
+
+    Thread(target=_worker, name="benchmark", daemon=True).start()
+    return {"status": "started"}
+
 
 def load_labels_order():
     """Return [class0, class1, ...] from labels.json, or canonical order."""

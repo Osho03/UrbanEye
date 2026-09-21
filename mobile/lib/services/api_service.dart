@@ -359,6 +359,24 @@ class ApiService {
     return {'error': 'Network error'};
   }
 
+  /// 'Run benchmark now' - asks the backend to re-measure every model against
+  /// the held-out set in a background job. Returns true if the job was
+  /// accepted; poll getModelHealth() until benchmark.running is false.
+  static Future<bool> startBenchmark() async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/analytics/benchmark'),
+        headers: _getHeaders(),
+      ).timeout(const Duration(seconds: 40));
+      if (response.statusCode == 200 || response.statusCode == 202) {
+        return true;
+      }
+    } catch (e) {
+      debugPrint('Error starting benchmark: $e');
+    }
+    return false;
+  }
+
   /// Helper: Get full image URL from backend image_path
   static String getImageUrl(String? imagePath) {
     if (imagePath == null || imagePath.isEmpty) return '';

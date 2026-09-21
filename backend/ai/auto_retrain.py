@@ -23,7 +23,6 @@ Trigger points:
 
 import json
 import os
-import shutil
 import threading
 import time
 from datetime import datetime
@@ -146,6 +145,22 @@ def count_dataset():
     return total
 
 
+# Training copies are downscaled to save storage (~99% smaller): a phone photo
+# is ~3-5 MB, a training thumbnail is ~50-150 KB. 1000 uploads ≈ 4 GB -> ~100 MB.
+CONVERT_MAX_SIDE = 640
+CONVERT_QUALITY = 88
+
+
+def _downscale_copy(src, dest):
+    """Copy src -> dest as a downscaled JPEG (best for training)."""
+    from PIL import Image
+    with Image.open(src) as im:
+        im = im.convert("RGB")
+        im.thumbnail((CONVERT_MAX_SIDE, CONVERT_MAX_SIDE), Image.LANCZOS)
+        im.save(dest, "JPEG", quality=CONVERT_QUALITY)
+    return True
+
+
 def collect_from_db(issues_collection):
     """
     Copy verified citizen uploads from MongoDB into ai/dataset/<class>/.
@@ -178,14 +193,14 @@ def collect_from_db(issues_collection):
             continue
 
         dest_dir = os.path.join(DATASET_DIR, issue_type)
-        filename = os.path.basename(str(image_path))
-        dest = os.path.join(dest_dir, filename)
+        filename = os.path.splitext(os.path.basename(str(image_path)))[0]
+        dest = os.path.join(dest_dir, filename + ".jpg")
         if os.path.exists(dest):
             continue  # already collected
         try:
-            shutil.copy(image_path, dest)
+            _downscale_copy(image_path, dest)
             stats[issue_type] += 1
-        except OSError as e:
+        except Exception as e:
             print(f"[auto_retrain] copy failed {image_path}: {e}")
             skipped += 1
     total = sum(stats.values())

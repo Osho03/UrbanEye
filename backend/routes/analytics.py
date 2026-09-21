@@ -221,6 +221,21 @@ def model_evaluation_artifact(filename):
     return send_from_directory(EVAL_DIR, safe)
 
 
+@analytics_bp.route("/benchmark", methods=["POST"])
+def benchmark():
+    """
+    'Run benchmark now' - re-measure every model against the held-out set in
+    a background thread and return immediately. Poll /model-health until
+    benchmark.running is false.
+    """
+    try:
+        from ai.evaluator import start_benchmark_async
+        result = start_benchmark_async()
+        return jsonify(result), 202 if result["status"] == "started" else 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
 @analytics_bp.route("/model-health", methods=["GET"])
 def model_health():
     """
@@ -247,6 +262,13 @@ def model_health():
             return jsonify({"status": "error", "message": str(e)})
 
     payload = model_health()
+
+    # async benchmark job status for the app "Run benchmark now" button
+    try:
+        from ai.evaluator import benchmark_status
+        payload["benchmark"] = benchmark_status()
+    except Exception:
+        pass
 
     # attach chart urls from the latest report
     try:

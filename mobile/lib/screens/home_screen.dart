@@ -16,6 +16,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic> _stats = {};
   Map<String, dynamic> _modelHealth = {};
+  bool _benchmarkRunning = false;
   Map<String, dynamic> _userImpact = {'total_impact': 0, 'rank': 'Bronze Citizen'};
   bool _isBackendConnected = false;
 
@@ -56,11 +57,46 @@ class _HomeScreenState extends State<HomeScreen> {
           _isBackendConnected = connected;
           _stats = stats;
           _modelHealth = modelHealth;
+          _benchmarkRunning = _readBenchmarkRunning(modelHealth);
           _userImpact = impact;
         });
       }
     } catch (e) {
       // Error loading data, silently handled
+    }
+  }
+
+  bool _readBenchmarkRunning(Map<String, dynamic> health) {
+    final b = health['benchmark'];
+    if (b is Map<String, dynamic>) {
+      return b['running'] == true;
+    }
+    return false;
+  }
+
+  Future<void> _runBenchmarkNow() async {
+    if (_benchmarkRunning) return;
+    final started = await ApiService.startBenchmark();
+    if (!mounted || !started) return;
+    setState(() => _benchmarkRunning = true);
+
+    // Poll the backend until the async benchmark job finishes (~2 min).
+    for (int attempt = 0; attempt < 70 && mounted; attempt++) {
+      await Future.delayed(const Duration(seconds: 5));
+      Map<String, dynamic> health = {'error': 'Network error'};
+      try {
+        health = await ApiService.getModelHealth();
+      } catch (_) {}
+      if (!mounted) return;
+      final stillRunning = _readBenchmarkRunning(health);
+      setState(() {
+        _modelHealth = health['error'] == null ? health : _modelHealth;
+        _benchmarkRunning = stillRunning;
+      });
+      if (!stillRunning) break;
+    }
+    if (mounted && _benchmarkRunning) {
+      setState(() => _benchmarkRunning = false);
     }
   }
 
@@ -380,18 +416,61 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 8),
             _buildRetrainStatusLine(),
-            const SizedBox(height: 4),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                onPressed: _showModelHealthCharts,
-                icon: const Icon(Icons.search_rounded, size: 16),
-                label: Text(
-                  'View accuracy charts',
-                  style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700),
+            const SizedBox(height: 6),
+            if (_benchmarkRunning)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Row(
+                  children: [
+                    const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Re-testing every model against ${_modelHealth['eval']?['n_samples'] ?? 'the'} real photos now…',
+                        style: GoogleFonts.inter(
+                          fontSize: 11,
+                          color: const Color(0xFF4285F4),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+              )
+            else
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: TextButton.icon(
+                      onPressed: _runBenchmarkNow,
+                      icon: const Icon(Icons.play_circle_outline,
+                          size: 16, color: Color(0xFF34A853)),
+                      label: Text(
+                        'Run benchmark now',
+                        style: GoogleFonts.inter(
+                            fontSize: 12, fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextButton.icon(
+                      onPressed: _showModelHealthCharts,
+                      icon: const Icon(Icons.search_rounded, size: 16),
+                      label: Text(
+                        'Accuracy charts',
+                        style: GoogleFonts.inter(
+                            fontSize: 12, fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
           ],
         ],
       ),
