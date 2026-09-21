@@ -14,6 +14,7 @@ import { Doughnut, Bar } from "react-chartjs-2";
 import PredictiveMaintenance from "./PredictiveMaintenance";
 import AutonomousAgentStatus from "./AutonomousAgentStatus";
 import SeasonalPatterns from "./SeasonalPatterns";
+import AIModelHealth from "./AIModelHealth";
 
 // Register ChartJS components
 ChartJS.register(
@@ -104,6 +105,9 @@ const Dashboard = () => {
 
             {/* Autonomous Action */}
             <AutonomousAgentStatus />
+
+            {/* AI Model Health (self-improving pipeline) */}
+            <AIModelHealth />
 
             {/* Smart Suggestions */}
             <div style={{ marginBottom: "2rem" }}>
