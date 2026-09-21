@@ -219,3 +219,46 @@ def model_evaluation_artifact(filename):
     if not os.path.isdir(EVAL_DIR):
         return jsonify({"status": "error", "message": "no evaluation dir"}), 404
     return send_from_directory(EVAL_DIR, safe)
+
+
+@analytics_bp.route("/model-health", methods=["GET"])
+def model_health():
+    """
+    AI Model Health: retraining status + latest evaluation metrics + charts.
+    Backs the 'AI Model Health' card in the app home screen.
+    Optional query params:
+      ?refresh=1  -> re-run the evaluation benchmark now
+      ?train=1    -> force a full retrain now (then re-evaluate)
+    """
+    try:
+        from ai.auto_retrain import model_health, maybe_auto_retrain
+    except ImportError as e:
+        return jsonify({"status": "unavailable", "message": f"{e}"})
+
+    if request.args.get("train", "").lower() in ("1", "true", "yes"):
+        result = maybe_auto_retrain(issues_collection, force=True,
+                                    evaluate=True)
+        return jsonify({"retrain": result, **model_health()})
+    if request.args.get("refresh", "").lower() in ("1", "true", "yes"):
+        try:
+            from ai.evaluator import run_evaluation
+            run_evaluation()
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)})
+
+    payload = model_health()
+
+    # attach chart urls from the latest report
+    try:
+        from ai.evaluator import latest_report
+        report = latest_report()
+        base = request.base_url.replace("/model-health", "/model-evaluation")
+        if report:
+            charts = {}
+            for model_name, m in (report.get("models") or {}).items():
+                for key, fn in (m.get("charts") or {}).items():
+                    charts[f"{model_name}/{key}"] = f"{base}/{fn}"
+            payload["charts"] = charts
+    except Exception:
+        pass
+    return jsonify(payload)

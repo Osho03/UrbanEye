@@ -76,5 +76,15 @@ def uploaded_file(filename):
     clean_name = filename.replace("uploads/", "").replace("uploads\\", "")
     return send_from_directory("uploads", clean_name)
 
+# Autonomous retraining scheduler (daemon thread). Surveys MongoDB every
+# UR_SCHED_MINUTES; retrains when new verified images accumulate, then
+# refreshes the evaluation report for Model Health. Optional on low-RAM hosts
+# via UR_AUTO_RETRAIN=0.
+try:
+    from ai.auto_retrain import scheduler_start
+    scheduler_start()
+except Exception as e:
+    print(f"[app] auto retrain scheduler unavailable: {e}")
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)

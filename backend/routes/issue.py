@@ -358,6 +358,16 @@ def report_issue():
         except Exception as e:
             print(f"Notification error (non-critical): {e}")
     
+    # Auto-retraining hook: this upload adds a labelled data point to the
+    # human-in-the-loop pipeline. A background thread collects verified data
+    # and, once enough NEW images accumulated, fine-tunes + hot-reloads the
+    # classifier and refreshes Model Health. Never blocks this response.
+    try:
+        from ai.auto_retrain import try_auto_retrain_async
+        try_auto_retrain_async(issues_collection)
+    except Exception as e:
+        print(f"Auto-retrain trigger error (non-critical): {e}")
+    
     response_data = {
         "message": "Issue reported", 
         "issue_type": issue_type,

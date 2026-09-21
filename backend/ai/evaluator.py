@@ -318,6 +318,34 @@ def latest_report():
         return json.load(f)
 
 
+def score_mobilenet(model_path):
+    """
+    Held-out (OOD) accuracy/macro-F1 of one MobileNetV2 weights file against
+    the shared eval set (training_data/). Used by the auto-retrain regression
+    guard to decide if a freshly trained model is SAFE to promote. Never
+    writes charts/reports; it is a pure measurement.
+    """
+    if not os.path.exists(model_path):
+        return None
+    try:
+        from tensorflow.keras.models import load_model
+        model = load_model(model_path)
+    except Exception as e:
+        print(f"[evaluator] guard load failed {os.path.basename(model_path)}: {e}")
+        return None
+    samples = load_samples()
+    label_order = load_labels_order()
+    y_true, y_pred = [], []
+    for path, label in samples:
+        pred, conf = _mobilenet_predict_symbolic(path, model, label_order)
+        y_true.append(label)
+        y_pred.append(pred)
+    import gc
+    del model
+    gc.collect()
+    return compute_metrics(y_true, y_pred, label_order)
+
+
 def train_and_evaluate_classifier():
     """Proper ML methodology study: stratified 80/20 holdout, augmentation,
     class weights and early stopping - then evaluate on the untouched holdout.
