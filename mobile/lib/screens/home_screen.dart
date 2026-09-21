@@ -15,6 +15,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic> _stats = {};
+  Map<String, dynamic> _modelHealth = {};
   Map<String, dynamic> _userImpact = {'total_impact': 0, 'rank': 'Bronze Citizen'};
   bool _isBackendConnected = false;
 
@@ -34,8 +35,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
       final connected = results[0] as bool;
       Map<String, dynamic> stats = {};
+      Map<String, dynamic> modelHealth = {};
       if (connected) {
-        stats = await ApiService.getAnalyticsStats();
+        final statsAndHealth = await Future.wait([
+          ApiService.getAnalyticsStats(),
+          ApiService.getModelHealth(),
+        ]);
+        stats = statsAndHealth[0];
+        modelHealth = statsAndHealth[1];
       }
 
       if (mounted) {
@@ -48,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           _isBackendConnected = connected;
           _stats = stats;
+          _modelHealth = modelHealth;
           _userImpact = impact;
         });
       }
@@ -77,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          
+
           RefreshIndicator(
             onRefresh: _loadData,
             child: CustomScrollView(
@@ -124,12 +132,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: CircleAvatar(
                                 radius: 24,
                                 backgroundColor: const Color(0xFFE8F0FE),
-                                backgroundImage: auth.currentUser?.profilePhoto != null 
-                                  ? NetworkImage(auth.currentUser!.profilePhoto!.startsWith('http') 
-                                      ? auth.currentUser!.profilePhoto! 
+                                backgroundImage: auth.currentUser?.profilePhoto != null
+                                  ? NetworkImage(auth.currentUser!.profilePhoto!.startsWith('http')
+                                      ? auth.currentUser!.profilePhoto!
                                       : ApiService.getImageUrl(auth.currentUser!.profilePhoto))
                                   : null,
-                                child: auth.currentUser?.profilePhoto == null 
+                                child: auth.currentUser?.profilePhoto == null
                                   ? const Icon(Icons.person, color: Color(0xFF4285F4))
                                   : null,
                               ),
@@ -211,6 +219,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: _buildImpactCard(),
                   ),
                 ),
+                // AI Model Health Card (Self-improving AI)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+                    child: _buildModelHealthCard(),
+                  ),
+                ),
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
@@ -276,6 +291,347 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: _buildBottomNav(),
     );
   }
+
+  // ============ AI Model Health Card ============
+
+  Widget _buildModelHealthCard() {
+    final bool hasData = _isBackendConnected &&
+        _modelHealth.isNotEmpty &&
+        _modelHealth['error'] == null &&
+        _modelHealth['eval'] != null;
+
+    final Map<String, dynamic> evalModels =
+        (hasData && _modelHealth['eval'] is Map<String, dynamic>)
+            ? ((_modelHealth['eval'] as Map<String, dynamic>)['models']
+                    as Map<String, dynamic>?)
+                ?? {}
+            : {};
+
+    return _buildGlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4285F4).withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.monitor_heart_rounded,
+                    color: Color(0xFF4285F4), size: 20),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'AI Model Health',
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                    color: const Color(0xFF202124),
+                  ),
+                ),
+              ),
+              _buildRetrainPill(hasData),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          if (!hasData)
+            Text(
+              'Model benchmarks unavailable right now.\nPull down to refresh.',
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: const Color(0xFF5F6368),
+                height: 1.4,
+              ),
+            )
+          else ...[
+            _buildAccuracyBar(
+              label: 'Object Detector (YOLOv8)',
+              accuracy: _readAccuracy(evalModels, 'yolov8_onnx'),
+              color: const Color(0xFFFBBC04),
+            ),
+            const SizedBox(height: 12),
+            _buildAccuracyBar(
+              label: 'Image Classifier (MobileNet)',
+              accuracy: _readAccuracy(evalModels, 'mobilenetv2'),
+              color: const Color(0xFF4285F4),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                const Icon(Icons.photo_library_outlined,
+                    size: 14, color: Color(0xFF5F6368)),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'Tested on ${_modelHealth['eval']?['n_samples'] ?? '-'} '
+                    'real citizen photos (held-out set)',
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      color: const Color(0xFF5F6368),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            _buildRetrainStatusLine(),
+            const SizedBox(height: 4),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: _showModelHealthCharts,
+                icon: const Icon(Icons.search_rounded, size: 16),
+                label: Text(
+                  'View accuracy charts',
+                  style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  double? _readAccuracy(Map<String, dynamic> evalModels, String key) {
+    final m = evalModels[key];
+    if (m is Map<String, dynamic> && m['metrics'] is Map<String, dynamic>) {
+      final acc = (m['metrics'] as Map<String, dynamic>)['accuracy'];
+      if (acc is num) return acc.toDouble();
+    }
+    return null;
+  }
+
+  Widget _buildRetrainPill(bool hasData) {
+    final bool on = hasData && (_modelHealth['auto_retrain_enabled'] ?? false) == true;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: on ? Colors.green[50] : Colors.grey[200],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.autorenew, size: 11,
+              color: on ? Colors.green.shade700 : Colors.grey[600]),
+          const SizedBox(width: 4),
+          Text(
+            on ? 'Self-training' : 'Retrain off',
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+              color: on ? Colors.green.shade800 : Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAccuracyBar({required String label, double? accuracy, required Color color}) {
+    final double frac = accuracy != null ? accuracy.clamp(0.0, 1.0) : 0.0;
+    final String txt = accuracy != null
+        ? '${(accuracy * 100).toStringAsFixed(1)}%'
+        : '--';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFF5F6368),
+                  fontWeight: FontWeight.w500),
+            ),
+            Text(
+              txt,
+              style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w800,
+                  color: color),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Container(
+            height: 8,
+            color: color.withValues(alpha: 0.12),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: FractionallySizedBox(
+                widthFactor: accuracy != null ? frac : 0.0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(6),
+                    gradient: LinearGradient(
+                      colors: [color.withValues(alpha: 0.7), color],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRetrainStatusLine() {
+    final dyn = _modelHealth['last_decision'];
+    final String dataset = (_modelHealth['dataset_images'] ?? 0).toString();
+    String text;
+    IconData icon;
+    Color color;
+
+    if (dyn is Map<String, dynamic>) {
+      final verdict = dyn['verdict']?.toString() ?? '';
+      final double? cand = dyn['candidate_acc'] is num
+          ? (dyn['candidate_acc'] as num).toDouble()
+          : null;
+      final double? live = dyn['live_acc'] is num
+          ? (dyn['live_acc'] as num).toDouble()
+          : null;
+      final String c = cand != null ? '${(cand * 100).toStringAsFixed(1)}%' : '--';
+      final String l = live != null ? '${(live * 100).toStringAsFixed(1)}%' : '--';
+      if (verdict == 'promoted') {
+        text = 'Last retrain: model improved to $c and was promoted';
+        icon = Icons.check_circle; color = Colors.green;
+      } else if (verdict == 'rejected') {
+        text = 'Last retrain: weaker model ($c < $l) was safely blocked';
+        icon = Icons.shield_rounded; color = Colors.orange;
+      } else {
+        text = 'Auto-retrain loop checked; no new data yet';
+        icon = Icons.info_outline; color = Colors.grey;
+      }
+    } else {
+      text = 'Learning from $dataset verified citizen photos so far';
+      icon = Icons.school_outlined; color = const Color(0xFF4285F4);
+    }
+    return Row(
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            text,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              color: const Color(0xFF5F6368),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showModelHealthCharts() {
+    final charts = _modelHealth['charts'];
+    final List<String> urls = <String>[];
+    if (charts is Map<String, dynamic>) {
+      final shown = <String>{
+        'yolov8_onnx/confusion',
+        'yolov8_onnx/performance',
+        'mobilenetv2/confusion',
+        'mobilenetv2/performance',
+      };
+      for (final key in shown) {
+        final v = charts[key];
+        if (v is String && v.isNotEmpty) urls.add(v);
+      }
+    }
+
+    showDialog<void>(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: const Color(0xFFF8F9FE),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'AI Model Benchmark',
+                style: GoogleFonts.inter(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF202124),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Every model is evaluated on the same set of real citizen '
+                'photos. Yellow = detector, Blue = classifier.',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  color: const Color(0xFF5F6368),
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Flexible(
+                child: urls.isEmpty
+                    ? const Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Text('No benchmark charts available yet.'),
+                      )
+                    : ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: urls.length,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(height: 12),
+                        itemBuilder: (context, i) => ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: InteractiveViewer(
+                            maxScale: 4,
+                            child: Image.network(
+                              urls[i],
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, progress) =>
+                                  progress == null
+                                      ? child
+                                      : Container(
+                                          height: 180,
+                                          color: const Color(0xFFE8F0FE),
+                                          alignment: Alignment.center,
+                                          child: const CircularProgressIndicator(),
+                                        ),
+                              errorBuilder: (context, error, stack) => Container(
+                                height: 120,
+                                alignment: Alignment.center,
+                                color: const Color(0xFFF1F3F4),
+                                child: const Text('Chart unavailable'),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Close',
+                    style: GoogleFonts.inter(fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ============ Shared building blocks ============
 
   Widget _buildGlassCard({required Widget child}) {
     return ClipRRect(

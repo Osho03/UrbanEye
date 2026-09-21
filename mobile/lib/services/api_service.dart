@@ -342,6 +342,23 @@ class ApiService {
     };
   }
 
+  /// AI Model Health - auto-retrain status + live accuracy of every model.
+  /// Backed by GET /api/analytics/model-health.
+  static Future<Map<String, dynamic>> getModelHealth() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/analytics/model-health'),
+        headers: _getHeaders(),
+      ).timeout(const Duration(seconds: 40));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+    } catch (e) {
+      debugPrint('Error getting model health: $e');
+    }
+    return {'error': 'Network error'};
+  }
+
   /// Helper: Get full image URL from backend image_path
   static String getImageUrl(String? imagePath) {
     if (imagePath == null || imagePath.isEmpty) return '';
