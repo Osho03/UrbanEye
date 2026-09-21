@@ -1,6 +1,8 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request, send_from_directory
 
 from config import issues_collection
+
+import os
 
 analytics_bp = Blueprint("analytics", __name__)
 
@@ -127,3 +129,93 @@ def priority_model_status():
         print(f"priority_model unavailable: {e}")
         return jsonify({"active": False, "reason": "Priority model needs scikit-learn/joblib on the server."})
     return jsonify(model_status())
+
+
+# ---------------------------------------------------------------------------
+# Model Evaluation & Benchmark Suite
+# Runs every deployed vision model against the labelled dataset and (optionally)
+# retrains a classifier with a proper stratified holdout. Produces honest
+# P/R/F1 + confusion-matrix artifacts for review/demo.
+# ---------------------------------------------------------------------------
+EVAL_DIR = os.path.join(os.path.dirname(__file__), "..", "ai", "evaluation")
+
+
+@analytics_bp.route("/model-evaluation", methods=["GET"])
+def model_evaluation():
+    try:
+        from ai.evaluator import (latest_report, run_evaluation,
+                                  train_and_evaluate_classifier)
+    except ImportError as e:
+        return jsonify({"status": "unavailable", "message": f"evaluator missing: {e}"})
+
+    do_refresh = request.args.get("refresh", "").lower() in ("1", "true", "yes")
+    do_train = request.args.get("train", "").lower() in ("1", "true", "yes")
+    if do_train:
+        try:
+            train_and_evaluate_classifier()
+        except Exception as e:
+            print(f"model-evaluation train failed: {e}")
+            return jsonify({"status": "error", "message": str(e)})
+    if do_refresh:
+        try:
+            run_evaluation()
+        except Exception as e:
+            print(f"model-evaluation refresh failed: {e}")
+            return jsonify({"status": "error", "message": str(e)})
+
+    base = request.base_url
+    payload = {"status": "ok", "chart_base": base}
+    report = latest_report()
+    if report:
+        payload["deployed_models"] = report.get("models")
+        payload["eval_set"] = {
+            "n_samples": report.get("n_samples"),
+            "classes": report.get("class_order"),
+            "generated_at": report.get("generated_at"),
+            "note": ("Out-of-distribution stress test on web-scraped images - "
+                     "expected to be much harder than in-domain citizen photos"),
+        }
+        for model_name, m in (report.get("models") or {}).items():
+            charts = m.get("charts") or {}
+            for key, fn in charts.items():
+                payload.setdefault("charts", {})[f"{model_name}/{key}"] = \
+                    f"{base}/{fn}"
+    else:
+        payload["models"] = {}
+        payload["eval_set"] = {"note": "no report yet - call with ?refresh=1"}
+
+    holdout = _latest_holdout()
+    if holdout:
+        payload["holdout_study"] = {
+            "method": holdout.get("method"),
+            "metrics": holdout.get("metrics"),
+            "generated_at": holdout.get("generated_at"),
+        }
+        for key, fn in (holdout.get("charts") or {}).items():
+            payload.setdefault("charts", {})[f"holdout/{key}"] = f"{base}/{fn}"
+    return jsonify(payload)
+
+
+def _latest_holdout():
+    import glob
+    import json as _json
+    if not os.path.isdir(EVAL_DIR):
+        return None
+    files = glob.glob(os.path.join(EVAL_DIR, "holdout_*.json"))
+    if not files:
+        return None
+    path = max(files, key=os.path.getmtime)
+    try:
+        with open(path) as f:
+            return _json.load(f)
+    except Exception:
+        return None
+
+
+@analytics_bp.route("/model-evaluation/<path:filename>", methods=["GET"])
+def model_evaluation_artifact(filename):
+    """Serve a generated report chart (confusion matrix / performance PNG)."""
+    safe = os.path.basename(filename)
+    if not os.path.isdir(EVAL_DIR):
+        return jsonify({"status": "error", "message": "no evaluation dir"}), 404
+    return send_from_directory(EVAL_DIR, safe)

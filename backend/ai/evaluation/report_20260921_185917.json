@@ -1,0 +1,315 @@
+{
+  "status": "ok",
+  "generated_at": "2026-09-21T18:59:17",
+  "n_samples": 102,
+  "class_order": [
+    "drainage",
+    "garbage",
+    "pothole",
+    "sidewalk_damage",
+    "streetlight",
+    "water_leak"
+  ],
+  "conf_thresholds": {
+    "yolo_per_class_floors": {
+      "0": 0.3,
+      "1": 0.32,
+      "2": 0.3,
+      "3": 0.3,
+      "4": 0.3,
+      "5": 0.3
+    },
+    "mobilenet": 0.6
+  },
+  "models": {
+    "yolov8_onnx": {
+      "metrics": {
+        "classes": [
+          "drainage",
+          "garbage",
+          "pothole",
+          "sidewalk_damage",
+          "streetlight",
+          "water_leak",
+          "unknown"
+        ],
+        "confusion": [
+          [
+            5,
+            0,
+            2,
+            0,
+            0,
+            0,
+            13
+          ],
+          [
+            3,
+            2,
+            0,
+            0,
+            0,
+            0,
+            15
+          ],
+          [
+            8,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2
+          ],
+          [
+            9,
+            0,
+            0,
+            1,
+            0,
+            0,
+            9
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            5,
+            0,
+            8
+          ],
+          [
+            1,
+            0,
+            2,
+            0,
+            0,
+            0,
+            17
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "per_class": {
+          "drainage": {
+            "tp": 5,
+            "fp": 21,
+            "fn": 15,
+            "precision": 0.192,
+            "recall": 0.25,
+            "f1": 0.217
+          },
+          "garbage": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 18,
+            "precision": 1.0,
+            "recall": 0.1,
+            "f1": 0.182
+          },
+          "pothole": {
+            "tp": 0,
+            "fp": 4,
+            "fn": 10,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "sidewalk_damage": {
+            "tp": 1,
+            "fp": 0,
+            "fn": 18,
+            "precision": 1.0,
+            "recall": 0.053,
+            "f1": 0.1
+          },
+          "streetlight": {
+            "tp": 5,
+            "fp": 0,
+            "fn": 8,
+            "precision": 1.0,
+            "recall": 0.385,
+            "f1": 0.556
+          },
+          "water_leak": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 20,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "unknown": {
+            "tp": 0,
+            "fp": 64,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "accuracy": 0.127,
+        "macro_f1": 0.176,
+        "unknown_count": 64,
+        "n_samples": 102
+      },
+      "charts": {
+        "confusion": "confusion_matrix_yolov8.png",
+        "performance": "performance_yolov8.png"
+      }
+    },
+    "mobilenetv2": {
+      "metrics": {
+        "classes": [
+          "drainage",
+          "garbage",
+          "pothole",
+          "sidewalk_damage",
+          "streetlight",
+          "water_leak",
+          "unknown"
+        ],
+        "confusion": [
+          [
+            5,
+            2,
+            0,
+            0,
+            0,
+            0,
+            13
+          ],
+          [
+            0,
+            6,
+            0,
+            0,
+            0,
+            0,
+            14
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            10
+          ],
+          [
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            18
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            7,
+            0,
+            6
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            18
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "per_class": {
+          "drainage": {
+            "tp": 5,
+            "fp": 0,
+            "fn": 15,
+            "precision": 1.0,
+            "recall": 0.25,
+            "f1": 0.4
+          },
+          "garbage": {
+            "tp": 6,
+            "fp": 2,
+            "fn": 14,
+            "precision": 0.75,
+            "recall": 0.3,
+            "f1": 0.429
+          },
+          "pothole": {
+            "tp": 0,
+            "fp": 1,
+            "fn": 10,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "sidewalk_damage": {
+            "tp": 0,
+            "fp": 0,
+            "fn": 19,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          },
+          "streetlight": {
+            "tp": 7,
+            "fp": 0,
+            "fn": 6,
+            "precision": 1.0,
+            "recall": 0.538,
+            "f1": 0.7
+          },
+          "water_leak": {
+            "tp": 2,
+            "fp": 0,
+            "fn": 18,
+            "precision": 1.0,
+            "recall": 0.1,
+            "f1": 0.182
+          },
+          "unknown": {
+            "tp": 0,
+            "fp": 79,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0
+          }
+        },
+        "accuracy": 0.196,
+        "macro_f1": 0.285,
+        "unknown_count": 79,
+        "n_samples": 102
+      },
+      "charts": {
+        "confusion": "confusion_matrix_mobilenetv2.png",
+        "performance": "performance_mobilenetv2.png"
+      }
+    }
+  },
+  "best_by_accuracy": "mobilenetv2"
+}
