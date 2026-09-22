@@ -13,6 +13,8 @@ import 'screens/my_reports_screen.dart';
 import 'screens/map_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/chatbot_screen.dart';
+import 'services/notification_service.dart';
+import 'services/fcm_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,6 +37,21 @@ void main() async {
 
   final featureFlags = FeatureFlagService();
   await featureFlags.fetchFlags();
+
+  // Local notification channel + permission (best-effort)
+  try {
+    await NotificationService.instance.init();
+  } catch (e) {
+    print('Notification init failed: $e');
+  }
+
+  // Firebase Cloud Messaging (real push). No-ops if google-services.json
+  // is missing, so the app still builds/runs without Firebase.
+  try {
+    await FcmService.instance.init();
+  } catch (e) {
+    print('FCM init failed: $e');
+  }
 
   runApp(
     MultiProvider(

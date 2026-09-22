@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../services/feature_flag_service.dart';
 import '../services/api_service.dart';
+import '../services/notification_service.dart';
+import '../services/fcm_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,6 +26,20 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadData();
+    // Real-time report updates + Firebase push registration once logged in.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final auth = Provider.of<AuthService>(context, listen: false);
+      if (auth.currentUser != null) {
+        NotificationService.instance.start(userId: auth.currentUser!.userId);
+        FcmService.instance.registerToken(auth.currentUser!.userId);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    NotificationService.instance.stop();
+    super.dispose();
   }
 
   Future<void> _loadData() async {

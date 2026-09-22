@@ -4,6 +4,10 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
+import 'personal_info_screen.dart';
+import 'notifications_screen.dart';
+import 'privacy_security_screen.dart';
+import 'about_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -171,17 +175,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildSettingTile(
               icon: Icons.person_outline_rounded,
               title: 'Personal Information',
-              onTap: () => _showEditProfile(context, auth),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PersonalInfoScreen()),
+              ),
             ),
             _buildSettingTile(
               icon: Icons.notifications_none_rounded,
               title: 'Notifications',
-              onTap: () {},
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+              ),
             ),
             _buildSettingTile(
               icon: Icons.security_rounded,
               title: 'Privacy & Security',
-              onTap: () {},
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PrivacySecurityScreen()),
+              ),
             ),
             
             const SizedBox(height: 24),
@@ -194,7 +207,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildSettingTile(
               icon: Icons.info_outline_rounded,
               title: 'About UrbanEye',
-              onTap: () {},
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AboutScreen()),
+              ),
             ),
 
             const SizedBox(height: 40),
@@ -256,27 +272,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         leading: Icon(icon, color: const Color(0xFF202124), size: 22),
         title: Text(title, style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600, color: const Color(0xFF202124))),
         trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
-      ),
-    );
-  }
-
-  void _showEditProfile(BuildContext context, AuthService auth) {
-    final nameController = TextEditingController(text: auth.userName);
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Edit Name'),
-        content: TextField(controller: nameController),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () async {
-              await auth.updateLocalUser(name: nameController.text.trim());
-              if (ctx.mounted) Navigator.pop(ctx);
-            },
-            child: const Text('Save'),
-          ),
-        ],
       ),
     );
   }

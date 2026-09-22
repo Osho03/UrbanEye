@@ -35,7 +35,12 @@ dependencies:
   geocoding: ^3.0.0
 
   # Voice / Speech
-  speech_to_text: ^7.3.0
+  speech_to_text: ^7.4.0
+
+  # Notifications & Push
+  flutter_local_notifications: ^22.3.1
+  firebase_core: ^4.15.0
+  firebase_messaging: ^16.7.0
 
   # Map
   flutter_map: ^6.1.0

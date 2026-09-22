@@ -121,10 +121,20 @@ class ApiService {
     String userId, {
     String? name,
     String? phone,
+    int? age,
+    String? gender,
+    bool? notificationsEnabled,
+    bool? notifyStatusUpdates,
+    bool? notifyDigest,
   }) async {
     final body = <String, dynamic>{};
     if (name != null) body['name'] = name;
     if (phone != null) body['phone'] = phone;
+    if (age != null) body['age'] = age;
+    if (gender != null) body['gender'] = gender;
+    if (notificationsEnabled != null) body['notifications_enabled'] = notificationsEnabled;
+    if (notifyStatusUpdates != null) body['notify_status_updates'] = notifyStatusUpdates;
+    if (notifyDigest != null) body['notify_digest'] = notifyDigest;
 
     final response = await http.put(
       Uri.parse('$baseUrl/api/user/profile/$userId'),
@@ -132,6 +142,46 @@ class ApiService {
       body: jsonEncode(body),
     );
     return jsonDecode(response.body);
+  }
+
+  /// Register this device's Firebase Cloud Messaging token for push updates.
+  static Future<bool> registerFcmToken({
+    required String userId,
+    required String token,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/user/fcm-token'),
+        headers: _getHeaders(contentType: 'application/json'),
+        body: jsonEncode({'user_id': userId, 'token': token}),
+      );
+      final data = jsonDecode(response.body);
+      return data['success'] == true;
+    } catch (e) {
+      print('Error registering FCM token: $e');
+      return false;
+    }
+  }
+
+  /// Fetch the aggregated notification feed for a user (newest first).
+  static Future<List<Map<String, dynamic>>> getUserNotifications(
+      String userId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/user/notifications/$userId'),
+        headers: _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          return List<Map<String, dynamic>>.from(
+              (data['notifications'] as List<dynamic>? ?? []));
+        }
+      }
+    } catch (e) {
+      print('Error fetching notifications: $e');
+    }
+    return [];
   }
 
   static Future<Map<String, dynamic>> updateProfilePhoto(
