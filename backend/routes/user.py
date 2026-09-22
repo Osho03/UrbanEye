@@ -319,7 +319,7 @@ def get_user_notifications(user_id):
                     "issue_id": str(iss["_id"]),
                     "issue_title": issue_title,
                     "issue_type": issue_type,
-                    "status": entry.get("status"),
+                    "status": entry.get("new_status") or entry.get("status"),
                     "comment": entry.get("comment"),
                     "changed_by": entry.get("changed_by", "System"),
                     "changed_at": ts,
