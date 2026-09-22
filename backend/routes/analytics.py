@@ -1,7 +1,8 @@
-from flask import Blueprint, jsonify, request, send_from_directory
+from flask import Blueprint, jsonify, request, send_from_directory, Response, stream_with_context
 
 from config import issues_collection
 
+import json
 import os
 
 analytics_bp = Blueprint("analytics", __name__)
@@ -284,3 +285,81 @@ def model_health():
     except Exception:
         pass
     return jsonify(payload)
+
+
+# ---------------------------------------------------------------------------
+# Phase 16: Real-time time-series & anomaly endpoints for the live dashboard
+# ---------------------------------------------------------------------------
+
+@analytics_bp.route("/trends", methods=["GET"])
+def get_trends():
+    """
+    Time-series of reported issues grouped by day or hour across N days.
+    Query params: ?days=30 (default) & ?granularity=daily|hourly (default daily)
+    """
+    days = request.args.get("days", default=30, type=int)
+    granularity = request.args.get("granularity", default="daily")
+    days = max(1, min(days, 365))
+    try:
+        from ai.time_series_analytics import build_trends
+        docs = list(issues_collection.find(
+            {}, {"created_at": 1, "issue_type": 1}))
+        return jsonify(build_trends(docs, days=days, granularity=granularity))
+    except Exception as e:
+        print(f"❌ Trends error: {e}")
+        return jsonify({"status": "error", "message": str(e)})
+
+
+@analytics_bp.route("/anomalies", methods=["GET"])
+def get_anomalies():
+    """
+    Real-time anomaly detection: flags issue-types whose report rate in the
+    last 24h deviates from the 7-day baseline (Poisson-normal z-score).
+    """
+    try:
+        from ai.time_series_analytics import detect_anomalies
+        docs = list(issues_collection.find(
+            {}, {"created_at": 1, "issue_type": 1}))
+        return jsonify(detect_anomalies(docs))
+    except Exception as e:
+        print(f"❌ Anomaly detection error: {e}")
+        return jsonify({"status": "error", "message": str(e)})
+
+
+@analytics_bp.route("/stream", methods=["GET"])
+def realtime_stream():
+    """
+    Server-Sent Events. Pushes every new/updated issue to connected
+    dashboards. Emits an initial 'snapshot' batch (recent issues) followed
+    by live events; '-: keep-alive' comments keep the socket warm for
+    gunicorn's response timeout.
+    """
+    try:
+        from services.realtime import get_feed
+    except Exception as e:
+        print(f"❌ realtime feed unavailable: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+    feed = get_feed()
+
+    def generate():
+        for payload in feed.snapshot():
+            yield f"event: snapshot\ndata: {json.dumps(payload)}\n\n"
+        while True:
+            payload = feed.next(timeout=12)
+            if payload is None:
+                yield ": keep-alive\n\n"
+                continue
+            event_name = "update" if payload.get("event") == "update" \
+                else "message"
+            yield f"event: {event_name}\ndata: {json.dumps(payload)}\n\n"
+
+    return Response(
+        stream_with_context(generate()),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+        },
+    )

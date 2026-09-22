@@ -15,6 +15,9 @@ import PredictiveMaintenance from "./PredictiveMaintenance";
 import AutonomousAgentStatus from "./AutonomousAgentStatus";
 import SeasonalPatterns from "./SeasonalPatterns";
 import AIModelHealth from "./AIModelHealth";
+import LiveFeed from "./LiveFeed";
+import TrendCharts from "./TrendCharts";
+import AnomalyAlerts from "./AnomalyAlerts";
 
 // Register ChartJS components
 ChartJS.register(
@@ -102,6 +105,12 @@ const Dashboard = () => {
                 </div>
                 <button onClick={fetchStats} className="btn btn-primary">Refresh Data</button>
             </div>
+
+            {/* Real-time anomaly watch */}
+            <AnomalyAlerts />
+
+            {/* Real-time live citizen feed (SSE) */}
+            <LiveFeed />
 
             {/* Autonomous Action */}
             <AutonomousAgentStatus />
@@ -191,6 +200,9 @@ const Dashboard = () => {
 
                 {/* Phase 4: Seasonal Intelligence */}
                 <SeasonalPatterns />
+
+                {/* Phase 16: Real-time reporting trends */}
+                <TrendCharts />
 
             </div>
         </div>
