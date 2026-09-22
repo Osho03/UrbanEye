@@ -68,58 +68,58 @@ const IssueList = () => {
 
     return (
         <div>
-            <div className="header" style={{ background: 'white', padding: '1.5rem 2rem', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="header" style={{ padding: '1.2rem 1.5rem', marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
                 <div>
-                    <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#1a202c' }}>🛡️ Issue Management Intelligence</h1>
-                    <p style={{ margin: "4px 0 0", color: "#718096", fontSize: '0.9rem' }}>
+                    <h1 style={{ margin: 0, fontSize: '1.4rem', color: '#f1f5f9' }}>🛡️ Issue Management Intelligence</h1>
+                    <p style={{ margin: "4px 0 0", color: "#94a3b8", fontSize: '0.9rem' }}>
                         Autonomous Monitoring: {issues.length} Active Incidents
                     </p>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    <div style={{ background: '#f0fff4', padding: '5px 15px', borderRadius: '20px', fontSize: '0.8rem', color: '#2f855a', fontWeight: 'bold', border: '1px solid #c6f6d5', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                        <span style={{ width: '8px', height: '8px', background: '#38a169', borderRadius: '50%', display: 'inline-block' }}></span>
+                    <div style={{ background: 'rgba(34,197,94,0.15)', padding: '5px 15px', borderRadius: '20px', fontSize: '0.8rem', color: '#4ade80', fontWeight: 'bold', border: '1px solid rgba(74,222,128,0.35)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <span style={{ width: '8px', height: '8px', background: '#4ade80', borderRadius: '50%', display: 'inline-block' }}></span>
                         Live Signal
                     </div>
-                    <button onClick={fetchIssues} className="btn" style={{ background: '#2b6cb0', color: 'white', padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem' }}>
+                    <button onClick={fetchIssues} className="btn btn-primary" style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
                         Refresh Feed
                     </button>
                 </div>
             </div>
 
-            <div className="card" style={{ padding: '1.5rem', borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}>
+            <div className="card" style={{ padding: '1.5rem' }}>
                 <div style={{ display: "flex", gap: "1rem", marginBottom: "1.5rem" }}>
                     <div style={{ position: 'relative', flex: 1 }}>
                         <input
                             placeholder="Search Intelligent Logs..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            style={{ width: '100%', padding: "0.75rem 1rem 0.75rem 2.5rem", borderRadius: "10px", border: "1px solid #e2e8f0", background: '#f8fafc' }}
+                            style={{ width: '100%', padding: "0.75rem 1rem 0.75rem 2.5rem", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.06)" }}
                         />
                         <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.4 }}>🔍</span>
                     </div>
                     <select
                         value={filter}
                         onChange={(e) => setFilter(e.target.value)}
-                        style={{ padding: "0.5rem 1rem", borderRadius: "10px", border: "1px solid #e2e8f0", background: 'white', fontWeight: '600', color: '#4a5568' }}
+                        style={{ padding: "0.5rem 1rem", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.12)", background: 'rgba(255,255,255,0.06)', fontWeight: '600', color: '#e2e8f0' }}
                     >
-                        <option value="All">All Intelligence Tags</option>
-                        <option value="Pending">🔴 Pending Review</option>
-                        <option value="Assigned">🔵 In Progress</option>
-                        <option value="Resolved">🟢 Resolved</option>
+                        <option value="All" style={{ background: '#0f172a' }}>All Intelligence Tags</option>
+                        <option value="Pending" style={{ background: '#0f172a' }}>🔴 Pending Review</option>
+                        <option value="Assigned" style={{ background: '#0f172a' }}>🔵 In Progress</option>
+                        <option value="Resolved" style={{ background: '#0f172a' }}>🟢 Resolved</option>
                     </select>
                 </div>
 
                 <div style={{ overflowX: 'auto' }}>
                     <table className="data-table">
-                        <thead style={{ background: '#f8fafc' }}>
+                        <thead>
                             <tr>
-                                <th style={{ color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Visual Evidence</th>
-                                <th style={{ color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Description</th>
-                                <th style={{ color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>AI Classification</th>
-                                <th style={{ color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Response Unit</th>
-                                <th style={{ color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Timestamp</th>
-                                <th style={{ color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Security Status</th>
-                                <th style={{ color: '#64748b', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '0.05em' }}>Operations</th>
+                                <th>Visual Evidence</th>
+                                <th>Description</th>
+                                <th>AI Classification</th>
+                                <th>Response Unit</th>
+                                <th>Timestamp</th>
+                                <th>Security Status</th>
+                                <th>Operations</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -142,41 +142,41 @@ const IssueList = () => {
 
                                 return (
                                     <tr key={issue.issue_id || Math.random()}>
-                                        <td style={{ padding: '1rem' }}>
+                                        <td style={{ padding: '0.85rem 1rem' }}>
                                             {thumbUrl ? (
                                                 isVideo ? (
-                                                    <div style={{ width: '60px', height: '60px', background: '#f1f5f9', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)' }}>
+                                                    <div style={{ width: '60px', height: '60px', background: 'rgba(255,255,255,0.06)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.12)' }}>
                                                         🎥
                                                     </div>
                                                 ) : (
                                                     <img
                                                         src={thumbUrl}
                                                         alt="evidence"
-                                                        style={{ width: "60px", height: "60px", objectFit: "cover", borderRadius: "10px", border: "2px solid white", boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
-                                                        onError={(e) => e.target.src = 'https://via.placeholder.com/60?text=Error'}
+                                                        style={{ width: "60px", height: "60px", objectFit: "cover", borderRadius: "10px", border: "2px solid rgba(255,255,255,0.2)", boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }}
+                                                        onError={(e) => { e.target.onerror = null; e.target.src = `${BASE_URL}/uploads/__missing__`; }}
                                                     />
                                                 )
                                             ) : (
-                                                <div style={{ width: '60px', height: '60px', background: '#f8fafc', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #e2e8f0' }}>
-                                                    <span style={{ fontSize: '1.2rem', opacity: 0.3 }}>📷</span>
+                                                <div style={{ width: '60px', height: '60px', background: 'rgba(255,255,255,0.04)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed rgba(255,255,255,0.2)' }}>
+                                                    <span style={{ fontSize: '1.2rem', opacity: 0.35 }}>📷</span>
                                                 </div>
                                             )}
                                         </td>
                                         <td style={{ verticalAlign: 'middle' }}>
-                                            <div style={{ maxWidth: "200px", fontWeight: '500', color: '#1e293b' }}>
+                                            <div style={{ maxWidth: "200px", fontWeight: '500', color: '#e2e8f0' }}>
                                                 {issue.description || <em style={{ color: "#94a3b8" }}>Encrypted or Null</em>}
                                             </div>
                                         </td>
                                         <td style={{ verticalAlign: 'middle' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                                <span style={{ fontWeight: "700", color: '#475569', textTransform: "capitalize" }}>
+                                                <span style={{ fontWeight: "700", color: '#f1f5f9', textTransform: "capitalize" }}>
                                                     {getIssueTypeString(issue.issue_type)}
                                                 </span>
                                                 {issue.verified && <span title="AI Verified" style={{ fontSize: '1rem' }}>🛡️</span>}
                                             </div>
                                         </td>
-                                        <td style={{ verticalAlign: 'middle', color: '#64748b', fontSize: '0.9rem' }}>{issue.assigned_department || "Awaiting Dispatch"}</td>
-                                        <td style={{ verticalAlign: 'middle', color: '#64748b', fontSize: '0.85rem' }}>
+                                        <td style={{ verticalAlign: 'middle', color: '#94a3b8', fontSize: '0.9rem' }}>{issue.assigned_department || "Awaiting Dispatch"}</td>
+                                        <td style={{ verticalAlign: 'middle', color: '#94a3b8', fontSize: '0.85rem' }}>
                                             {issue.created_at ? new Date(issue.created_at).toLocaleString() : "Syncing..."}
                                         </td>
                                         <td style={{ verticalAlign: 'middle' }}>
@@ -188,7 +188,7 @@ const IssueList = () => {
                                             <Link
                                                 to={`/issues/${issue.issue_id}`}
                                                 className="btn"
-                                                style={{ background: '#f1f5f9', color: '#334155', textDecoration: "none", fontSize: "0.8rem", padding: "8px 12px", borderRadius: '8px', border: '1px solid #e2e8f0', fontWeight: 'bold', transition: 'all 0.2s' }}
+                                                style={{ background: 'rgba(255,255,255,0.06)', color: '#e2e8f0', textDecoration: "none", fontSize: "0.8rem", padding: "8px 12px", borderRadius: '10px', border: '1px solid rgba(255,255,255,0.12)', fontWeight: 'bold', transition: 'all 0.2s' }}
                                             >
                                                 Inspect 🔍
                                             </Link>
@@ -200,10 +200,10 @@ const IssueList = () => {
                             {filteredIssues.length === 0 && (
                                 <tr>
                                     <td colSpan="7" style={{ textAlign: "center", padding: "5rem 2rem" }}>
-                                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📡</div>
-                                        <h3 style={{ margin: 0, color: '#475569' }}>Synchronizing Real-time Feed...</h3>
+                                        <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.8 }}>📡</div>
+                                        <h3 style={{ margin: 0, color: '#e2e8f0' }}>Synchronizing Real-time Feed...</h3>
                                         <p style={{ color: '#94a3b8', marginTop: '0.5rem' }}>The database is clean and waiting for the next user report.</p>
-                                        <button onClick={fetchIssues} className="btn" style={{ marginTop: '1.5rem', background: '#2b6cb0', color: 'white' }}>Check for New Signals</button>
+                                        <button onClick={fetchIssues} className="btn btn-primary" style={{ marginTop: '1.5rem' }}>Check for New Signals</button>
                                     </td>
                                 </tr>
                             )}

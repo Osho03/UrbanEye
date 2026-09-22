@@ -147,10 +147,10 @@ const IssueDetail = () => {
 
                     {/* NEW: AI INSPECTOR AGENT PANEL */}
                     {aiSummary && (
-                        <div className="card" style={{ borderLeft: "5px solid #6b46c1", background: "#faf5ff" }}>
+                        <div className="card" style={{ borderLeft: "5px solid #8B5CF6", background: "rgba(139,92,246,0.08)" }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <h3 style={{ margin: 0, color: "#553c9a" }}>🤖 AI Inspector Agent</h3>
-                                <button onClick={speakSummary} className="btn" style={{ background: "#805ad5", color: "white", padding: "5px 10px", fontSize: "0.8rem" }}>
+                                <h3 style={{ margin: 0, color: "#C4B5FD" }}>🤖 AI Inspector Agent</h3>
+                                <button onClick={speakSummary} className="btn" style={{ background: "#8B5CF6", color: "white", padding: "5px 10px", fontSize: "0.8rem" }}>
                                     🎤 Explain This
                                 </button>
                             </div>
@@ -159,19 +159,21 @@ const IssueDetail = () => {
                                 <div style={{ textAlign: "center" }}>
                                     <div style={{
                                         width: "60px", height: "60px", borderRadius: "50%",
-                                        background: aiSummary.priority_score > 75 ? "#e53e3e" : "#38a169",
+                                        border: "1px solid rgba(255,255,255,0.15)",
+                                        boxShadow: "0 4px 16px rgba(139,92,246,0.3)",
+                                        background: aiSummary.priority_score > 75 ? "linear-gradient(135deg,#F43F5E,#FB7185)" : "linear-gradient(135deg,#22C55E,#4ADE80)",
                                         color: "white", display: "flex", alignItems: "center", justifyContent: "center",
                                         fontWeight: "bold", fontSize: "1.2rem"
                                     }}>
                                         {aiSummary.priority_score}
                                     </div>
-                                    <small>Priority</small>
+                                    <small style={{ color: "#94a3b8" }}>Priority</small>
                                 </div>
                                 <div style={{ flex: 1 }}>
-                                    <p style={{ margin: "0", fontWeight: "bold" }}>{aiSummary.suggested_action}</p>
+                                    <p style={{ margin: "0", fontWeight: "bold", color: "#f1f5f9" }}>{aiSummary.suggested_action}</p>
                                     <div style={{ marginTop: "0.5rem" }}>
                                         {aiSummary.explanations.map((exp, idx) => (
-                                            <p key={idx} style={{ margin: "2px 0", fontSize: "0.85rem", color: "#4a5568" }}>
+                                            <p key={idx} style={{ margin: "2px 0", fontSize: "0.85rem", color: "#cbd5e1" }}>
                                                 {exp}
                                             </p>
                                         ))}
@@ -181,20 +183,20 @@ const IssueDetail = () => {
                         </div>
                     )}
 
-                    <div className="card" style={{ borderLeft: "5px solid #2b6cb0", background: "#ebf8ff" }}>
-                        <h3 style={{ margin: 0, color: "#2b6cb0" }}>📊 Impact Intelligence</h3>
+                    <div className="card" style={{ borderLeft: "5px solid #38BDF8", background: "rgba(56,189,248,0.08)" }}>
+                        <h3 style={{ margin: 0, color: "#7DD3FC" }}>📊 Impact Intelligence</h3>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginTop: "1rem" }}>
-                            <div style={{ padding: "10px", background: "white", borderRadius: "8px", textAlign: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}>
-                                <small style={{ color: "#718096", display: "block" }}>Repair Cost</small>
-                                <strong style={{ fontSize: "1.1rem", color: "#2f855a" }}>₹{issue.estimated_repair_cost || 0}</strong>
+                            <div style={{ padding: "10px", background: "rgba(255,255,255,0.05)", borderRadius: "10px", textAlign: "center", border: "1px solid rgba(255,255,255,0.1)" }}>
+                                <small style={{ color: "#94a3b8", display: "block" }}>Repair Cost</small>
+                                <strong style={{ fontSize: "1.1rem", color: "#4ADE80" }}>₹{issue.estimated_repair_cost || 0}</strong>
                             </div>
-                            <div style={{ padding: "10px", background: "white", borderRadius: "8px", textAlign: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}>
-                                <small style={{ color: "#718096", display: "block" }}>Affected Pop.</small>
-                                <strong style={{ fontSize: "1.1rem", color: "#c05621" }}>{issue.affected_population || 0}</strong>
+                            <div style={{ padding: "10px", background: "rgba(255,255,255,0.05)", borderRadius: "10px", textAlign: "center", border: "1px solid rgba(255,255,255,0.1)" }}>
+                                <small style={{ color: "#94a3b8", display: "block" }}>Affected Pop.</small>
+                                <strong style={{ fontSize: "1.1rem", color: "#FB923C" }}>{issue.affected_population || 0}</strong>
                             </div>
-                            <div style={{ padding: "10px", background: "white", borderRadius: "8px", textAlign: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.05)", gridColumn: "span 2" }}>
-                                <small style={{ color: "#718096", display: "block" }}>Impact Radius</small>
-                                <strong style={{ fontSize: "1.1rem", color: "#2b6cb0" }}>{issue.impact_radius || 0} Meters</strong>
+                            <div style={{ padding: "10px", background: "rgba(255,255,255,0.05)", borderRadius: "10px", textAlign: "center", border: "1px solid rgba(255,255,255,0.1)", gridColumn: "span 2" }}>
+                                <small style={{ color: "#94a3b8", display: "block" }}>Impact Radius</small>
+                                <strong style={{ fontSize: "1.1rem", color: "#7DD3FC" }}>{issue.impact_radius || 0} Meters</strong>
                             </div>
                         </div>
                     </div>
@@ -208,7 +210,7 @@ const IssueDetail = () => {
                                     src={imageUrl}
                                     controls
                                     className="detail-image"
-                                    style={{ width: "100%", maxHeight: "400px", objectFit: "contain", backgroundColor: "#000" }}
+                                    style={{ width: "100%", maxHeight: "400px", objectFit: "contain", backgroundColor: "#020617" }}
                                 >
                                     Your browser does not support videos.
                                 </video>
@@ -219,7 +221,7 @@ const IssueDetail = () => {
                                             <div style={{
                                                 fontSize: "0.8rem",
                                                 fontWeight: "600",
-                                                color: "#2563eb",
+                                                color: "#7DD3FC",
                                                 marginBottom: "0.4rem",
                                                 textTransform: "uppercase",
                                                 letterSpacing: "0.04em"
@@ -241,7 +243,7 @@ const IssueDetail = () => {
                                             <div style={{
                                                 fontSize: "0.8rem",
                                                 fontWeight: "600",
-                                                color: "#64748b",
+                                                color: "#94a3b8",
                                                 margin: annotatedUrl ? "0.8rem 0 0.4rem" : "0 0 0.4rem",
                                                 textTransform: "uppercase",
                                                 letterSpacing: "0.04em"
@@ -252,7 +254,7 @@ const IssueDetail = () => {
                                                 src={imageUrl}
                                                 alt={issue.issue_type}
                                                 className="detail-image"
-                                                onError={(e) => { e.target.src = "https://via.placeholder.com/400?text=Image+Load+Error"; }}
+                                                onError={(e) => { e.target.onerror = null; e.target.src = `${BASE_URL}/uploads/__missing__`; }}
                                             />
                                         </>
                                     )}
@@ -262,11 +264,11 @@ const IssueDetail = () => {
                             <div style={{
                                 padding: "3rem",
                                 textAlign: "center",
-                                backgroundColor: "#f7fafc",
-                                borderRadius: "8px",
-                                border: "2px dashed #cbd5e0"
+                                backgroundColor: "rgba(255,255,255,0.03)",
+                                borderRadius: "12px",
+                                border: "2px dashed rgba(255,255,255,0.2)"
                             }}>
-                                <p style={{ margin: 0, color: "#718096" }}>No visual evidence uploaded.</p>
+                                <p style={{ margin: 0, color: "#94a3b8" }}>No visual evidence uploaded.</p>
                             </div>
                         )}
 
@@ -336,14 +338,14 @@ const IssueDetail = () => {
                             <div style={{
                                 marginTop: "1rem",
                                 padding: "1rem",
-                                backgroundColor: "#f0fff4",
-                                border: "1px solid #48bb78",
-                                borderRadius: "8px"
+                                backgroundColor: "rgba(34,197,94,0.1)",
+                                border: "1px solid rgba(74,222,128,0.35)",
+                                borderRadius: "10px"
                             }}>
-                                <strong style={{ color: "#2f855a", display: "flex", alignItems: "center", gap: "5px" }}>
+                                <strong style={{ color: "#4ADE80", display: "flex", alignItems: "center", gap: "5px" }}>
                                     🎤 Voice Note (Valid Evidence)
                                 </strong>
-                                <p style={{ margin: "0.5rem 0 0", fontStyle: "italic" }}>"{issue.voice_transcript}"</p>
+                                <p style={{ margin: "0.5rem 0 0", fontStyle: "italic", color: "#e2e8f0" }}>"{issue.voice_transcript}"</p>
                             </div>
                         )}
 
@@ -418,7 +420,7 @@ const IssueDetail = () => {
                             value={remarks}
                             onChange={(e) => setRemarks(e.target.value)}
                             placeholder="Add notes for other admins..."
-                            style={{ width: "100%", padding: "0.75rem", borderRadius: "8px", border: "1px solid #e2e8f0", minHeight: "80px" }}
+                            style={{ width: "100%", padding: "0.75rem", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.05)", minHeight: "80px", color: "#f1f5f9" }}
                         />
                     </div>
 
@@ -429,10 +431,10 @@ const IssueDetail = () => {
             {issue.volumetric_data && (
                 <div className="card" style={{ marginTop: "1rem" }}>
                     <h3 style={{ marginTop: 0 }}>🏗️ Engineering & Repair Estimates</h3>
-                    <div style={{ display: "flex", gap: "20px" }}>
+                    <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
                         {/* Depth Map */}
-                        <div style={{ flex: 1 }}>
-                            <p style={{ fontSize: "0.9rem", color: "#718096" }}>AI Depth Map & Topology</p>
+                        <div style={{ flex: 1, minWidth: "280px" }}>
+                            <p style={{ fontSize: "0.9rem", color: "#94a3b8" }}>AI Depth Map & Topology</p>
                             {(() => {
                                 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
                                 const BASE_URL = API_URL.replace("/api", "");
@@ -440,25 +442,26 @@ const IssueDetail = () => {
                                     <img
                                         src={`${BASE_URL}/uploads/${issue.volumetric_data.depth_map_filename}`}
                                         alt="Depth Map"
-                                        style={{ width: "100%", borderRadius: "8px", border: "1px solid #cbd5e0" }}
+                                        onError={(e) => { e.target.onerror = null; e.target.src = `${BASE_URL}/uploads/__missing__`; }}
+                                        style={{ width: "100%", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.12)" }}
                                     />
                                 );
                             })()}
                         </div>
 
                         {/* Metrics */}
-                        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                            <div className="metric-box" style={{ marginBottom: "10px", padding: "10px", background: "#ebf8ff", borderRadius: "5px" }}>
-                                <strong style={{ color: "#2b6cb0" }}>Est. Volume:</strong>
-                                <div style={{ fontSize: "1.2rem", fontWeight: "bold" }}>{issue.volumetric_data.volume_liters} Liters</div>
+                        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", minWidth: "240px" }}>
+                            <div className="metric-box" style={{ marginBottom: "10px", padding: "10px", background: "rgba(56,189,248,0.08)", border: "1px solid rgba(56,189,248,0.2)", borderRadius: "10px" }}>
+                                <strong style={{ color: "#7DD3FC" }}>Est. Volume:</strong>
+                                <div style={{ fontSize: "1.2rem", fontWeight: "bold", color: "#f1f5f9" }}>{issue.volumetric_data.volume_liters} Liters</div>
                             </div>
-                            <div className="metric-box" style={{ marginBottom: "10px", padding: "10px", background: "#f0fff4", borderRadius: "5px" }}>
-                                <strong style={{ color: "#2f855a" }}>Material Needed (Asphalt):</strong>
-                                <div style={{ fontSize: "1.2rem", fontWeight: "bold" }}>{issue.volumetric_data.material_kg} Kg</div>
+                            <div className="metric-box" style={{ marginBottom: "10px", padding: "10px", background: "rgba(34,197,94,0.08)", border: "1px solid rgba(34,197,94,0.2)", borderRadius: "10px" }}>
+                                <strong style={{ color: "#4ADE80" }}>Material Needed (Asphalt):</strong>
+                                <div style={{ fontSize: "1.2rem", fontWeight: "bold", color: "#f1f5f9" }}>{issue.volumetric_data.material_kg} Kg</div>
                             </div>
-                            <div className="metric-box" style={{ padding: "10px", background: "#fffaf0", borderRadius: "5px" }}>
-                                <strong style={{ color: "#c05621" }}>Est. Repair Cost:</strong>
-                                <div style={{ fontSize: "1.2rem", fontWeight: "bold" }}>₹{issue.volumetric_data.repair_cost}</div>
+                            <div className="metric-box" style={{ padding: "10px", background: "rgba(251,146,60,0.08)", border: "1px solid rgba(251,146,60,0.2)", borderRadius: "10px" }}>
+                                <strong style={{ color: "#FB923C" }}>Est. Repair Cost:</strong>
+                                <div style={{ fontSize: "1.2rem", fontWeight: "bold", color: "#f1f5f9" }}>₹{issue.volumetric_data.repair_cost}</div>
                             </div>
                         </div>
                     </div>

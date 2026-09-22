@@ -76,7 +76,27 @@ def report_issue():
         unique_filename = f"{int(time.time())}_{uuid.uuid4().hex[:8]}{ext}"
         image_path = os.path.join(UPLOAD_FOLDER, unique_filename)
         
-        image.save(image_path)
+        image_data = image.read()
+        with open(image_path, "wb") as f:
+            f.write(image_data)
+        
+        # Archive a durable copy in MongoDB so uploads survive Render redeploys
+        # (Render's local disk is ephemeral and wiped on every deploy).
+        try:
+            from config import db as cdb
+            if image_data and len(image_data) < 15 * 1024 * 1024:
+                cdb["uploaded_files"].update_one(
+                    {"filename": unique_filename},
+                    {"$set": {
+                        "filename": unique_filename,
+                        "data": image_data,
+                        "mimetype": image.mimetype or "application/octet-stream",
+                        "created_at": datetime.utcnow().isoformat(),
+                    }},
+                    upsert=True,
+                )
+        except Exception as e:
+            print(f"[issue] upload archive to DB skipped: {type(e).__name__}: {e}")
         
         # Check Media Type
         filename_lower = image.filename.lower()

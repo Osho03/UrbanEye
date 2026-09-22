@@ -37,10 +37,11 @@ const Login = ({ onLogin }) => {
 
                 {error && (
                     <div style={{
-                        background: "#fed7d7",
-                        color: "#c53030",
+                        background: "rgba(244,63,94,0.15)",
+                        color: "#FDA4AF",
+                        border: "1px solid rgba(244,63,94,0.3)",
                         padding: "0.75rem",
-                        borderRadius: "8px",
+                        borderRadius: "10px",
                         marginBottom: "1rem",
                         textAlign: "center"
                     }}>
@@ -74,7 +75,7 @@ const Login = ({ onLogin }) => {
                     </button>
                 </form>
 
-                <p style={{ textAlign: "center", marginTop: "1rem", color: "#718096", fontSize: "0.9rem" }}>
+                <p style={{ textAlign: "center", marginTop: "1rem", color: "rgba(255,255,255,0.45)", fontSize: "0.9rem" }}>
                     Authorized personnel only
                 </p>
             </div>

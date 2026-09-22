@@ -29,11 +29,11 @@ const SeasonalPatterns = () => {
 
     if (data.status !== "ok") {
         return (
-            <div className="card" style={{ background: "white", borderRadius: "16px", padding: "1.5rem" }}>
-                <h3 style={{ margin: "0 0 0.5rem", fontSize: "1rem", fontWeight: 600, color: "#4A5568" }}>
+            <div className="card" style={{ borderRadius: "16px", padding: "1.5rem" }}>
+                <h3 style={{ margin: "0 0 0.5rem", fontSize: "1rem", fontWeight: 600, color: "#f1f5f9" }}>
                     📊 Seasonal Intelligence
                 </h3>
-                <p style={{ color: "#A0AEC0", margin: 0 }}>{data.message}</p>
+                <p style={{ color: "#94a3b8", margin: 0 }}>{data.message}</p>
             </div>
         );
     }
@@ -45,14 +45,15 @@ const SeasonalPatterns = () => {
 
     return (
         <div className="card" style={{
-            background: "white", borderRadius: "16px", padding: "1.5rem",
-            boxShadow: "0 4px 6px rgba(0,0,0,0.05)", gridColumn: "1 / -1"
+            borderRadius: "16px", padding: "1.5rem",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.18)", gridColumn: "1 / -1",
+            border: "1px solid rgba(255,255,255,0.1)"
         }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap" }}>
-                <h3 style={{ margin: "0 0 0.2rem", fontSize: "1rem", fontWeight: 600, color: "#4A5568" }}>
+                <h3 style={{ margin: "0 0 0.2rem", fontSize: "1rem", fontWeight: 600, color: "#f1f5f9" }}>
                     📊 Seasonal Intelligence
                 </h3>
-                <span style={{ fontSize: "0.75rem", color: "#A0AEC0" }}>
+                <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
                     mined from {data.total_analyzed} reports (12 months)
                 </span>
             </div>
@@ -61,7 +62,7 @@ const SeasonalPatterns = () => {
             <div style={{ marginTop: "1rem", overflowX: "auto" }}>
                 {Object.entries(data.monthly_matrix).map(([type, counts]) => (
                     <div key={type} style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
-                        <span style={{ width: "130px", fontSize: "0.78rem", fontWeight: 500, color: "#4A5568" }}>
+                        <span style={{ width: "130px", fontSize: "0.78rem", fontWeight: 500, color: "#cbd5e1" }}>
                             {type.replace(/_/g, " ")}
                         </span>
                         <div style={{ display: "flex", gap: "3px", flex: 1, minWidth: "420px" }}>

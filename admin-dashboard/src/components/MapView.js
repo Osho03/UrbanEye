@@ -116,21 +116,21 @@ const MapView = () => {
 
     return (
         <div className="map-page">
-            <div className="header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 2rem', background: 'white', borderRadius: '12px', marginBottom: '1rem', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+            <div className="header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderRadius: '16px', marginBottom: '1rem' }}>
                 <div>
-                    <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#1a202c' }}>🌍 Geospatial Intelligence</h1>
-                    <p style={{ margin: "4px 0 0", color: "#718096", fontSize: '0.9rem' }}>
-                        Live Monitoring: {issues.length} Issues | <span style={{ color: '#38a169' }}>Real-time Feed Active</span>
+                    <h1 style={{ margin: 0, fontSize: '1.4rem', color: '#f1f5f9' }}>🌍 Geospatial Intelligence</h1>
+                    <p style={{ margin: "4px 0 0", color: "#94a3b8", fontSize: '0.9rem' }}>
+                        Live Monitoring: {issues.length} Issues | <span style={{ color: '#4ade80' }}>Real-time Feed Active</span>
                     </p>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    <div style={{ background: '#ebf8ff', padding: '5px 15px', borderRadius: '20px', fontSize: '0.8rem', color: '#2b6cb0', fontWeight: 'bold', border: '1px solid #bee3f8' }}>
+                    <div style={{ background: 'rgba(56,189,248,0.12)', padding: '5px 15px', borderRadius: '20px', fontSize: '0.8rem', color: '#7DD3FC', fontWeight: 'bold', border: '1px solid rgba(56,189,248,0.35)' }}>
                         🛰️ Real-time Tracking
                     </div>
                 </div>
             </div>
 
-            <div className="card" style={{ padding: 0, overflow: "hidden", height: "calc(100vh - 200px)", borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}>
+            <div className="card" style={{ padding: 0, overflow: "hidden", height: "calc(100vh - 200px)", borderRadius: '16px' }}>
                 <MapContainer
                     center={defaultCenter}
                     zoom={5}

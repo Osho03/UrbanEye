@@ -1,7 +1,10 @@
-from flask import Flask, send_from_directory, jsonify
+from flask import Flask, send_from_directory, jsonify, Response
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os
+import mimetypes
+
+from config import db as mongo_db
 
 # Optional local .env loading
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -71,10 +74,58 @@ app.register_blueprint(features_bp, url_prefix="/api/features")
 if CHATBOT_AVAILABLE:
     app.register_blueprint(chatbot_bp)
 
+PLACEHOLDER_SVG = (
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">'
+    '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">'
+    '<stop offset="0" stop-color="#667eea"/><stop offset="1" stop-color="#764ba2"/>'
+    '</linearGradient></defs>'
+    '<rect width="200" height="200" rx="18" fill="url(#g)" opacity="0.92"/>'
+    '<g fill="none" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" opacity="0.95">'
+    '<rect x="56" y="54" width="88" height="72" rx="12"/>'
+    '<circle cx="100" cy="90" r="18"/>'
+    '<path d="M68 58 L76 42 L124 42 L132 58"/>'
+    '</g>'
+    '<text x="100" y="152" fill="#ffffff" font-family="Segoe UI, Arial, sans-serif" '
+    'font-size="15" text-anchor="middle" opacity="0.92">Evidence not archived</text>'
+    '</svg>'
+)
+
+
+def _placeholder_image():
+    return Response(PLACEHOLDER_SVG, mimetype="image/svg+xml")
+
+
+def _serve_upload(clean_name):
+    """Serve an uploaded file. Tries the local disk first (fast path), then the
+    durable MongoDB copy (survives Render's ephemeral disk being wiped on
+    redeploy), and finally falls back to a built-in placeholder instead of a 404."""
+    if not clean_name or clean_name.startswith((".", "/", "\\")):
+        return _placeholder_image()
+
+    local = os.path.join("uploads", clean_name)
+    if os.path.isfile(local):
+        return send_from_directory("uploads", clean_name)
+
+    try:
+        rec = mongo_db["uploaded_files"].find_one(
+            {"filename": clean_name}, {"_id": 0, "data": 1, "mimetype": 1}
+        )
+        if rec and rec.get("data"):
+            mime = rec.get("mimetype") or \
+                mimetypes.guess_type(clean_name)[0] or "application/octet-stream"
+            if mime.startswith("text/"):
+                mime = "application/octet-stream"
+            return Response(rec["data"], mimetype=mime)
+    except Exception as e:
+        print(f"[uploads] Mongo lookup failed for {clean_name}: {type(e).__name__}: {e}")
+
+    return _placeholder_image()
+
+
 @app.route("/uploads/<path:filename>")
 def uploaded_file(filename):
     clean_name = filename.replace("uploads/", "").replace("uploads\\", "")
-    return send_from_directory("uploads", clean_name)
+    return _serve_upload(clean_name)
 
 # Autonomous retraining scheduler (daemon thread). Surveys MongoDB every
 # UR_SCHED_MINUTES; retrains when new verified images accumulate, then

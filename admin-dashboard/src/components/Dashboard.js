@@ -100,8 +100,8 @@ const Dashboard = () => {
         <div style={{ paddingBottom: "2rem" }}>
             <div className="header" style={{ marginBottom: "2rem" }}>
                 <div>
-                    <h1 style={{ margin: 0, fontSize: "1.75rem", color: "#1a202c" }}>City Manager's Dashboard</h1>
-                    <p style={{ margin: "0.5rem 0 0", color: "#718096" }}>Real-time overview of city infrastructure health</p>
+                    <h1 style={{ margin: 0, fontSize: "1.6rem", color: "#f1f5f9" }}>City Manager's Dashboard</h1>
+                    <p style={{ margin: "0.5rem 0 0", color: "#94a3b8" }}>Real-time overview of city infrastructure health</p>
                 </div>
                 <button onClick={fetchStats} className="btn btn-primary">Refresh Data</button>
             </div>
@@ -127,36 +127,36 @@ const Dashboard = () => {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
 
                 {/* Card 1: Total Issues */}
-                <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", background: "white", borderRadius: "16px", boxShadow: "0 4px 6px rgba(0,0,0,0.05)", padding: "1.5rem" }}>
-                    <h3 style={{ fontSize: "0.85rem", textTransform: "uppercase", color: "#718096", margin: 0, letterSpacing: "0.05em" }}>Total Reports</h3>
-                    <div style={{ fontSize: "2.5rem", fontWeight: "700", color: "#2D3748", marginTop: "1rem" }}>
+                <div className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", background: "rgba(255,255,255,0.06)", borderRadius: "16px", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", padding: "1.5rem", border: "1px solid rgba(255,255,255,0.1)" }}>
+                    <h3 style={{ fontSize: "0.85rem", textTransform: "uppercase", color: "#94a3b8", margin: 0, letterSpacing: "0.05em" }}>Total Reports</h3>
+                    <div style={{ fontSize: "2.5rem", fontWeight: "700", color: "#f1f5f9", marginTop: "1rem" }}>
                         {stats.total.toLocaleString()}
                     </div>
                 </div>
 
                 {/* Card 2: Resolution Rate (Gauge) */}
-                <div className="card" style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", background: "white", borderRadius: "16px", boxShadow: "0 4px 6px rgba(0,0,0,0.05)", padding: "1.5rem" }}>
-                    <h3 style={{ width: "100%", fontSize: "0.85rem", textTransform: "uppercase", color: "#718096", margin: 0, letterSpacing: "0.05em" }}>Resolution Efficiency</h3>
+                <div className="card" style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", background: "rgba(255,255,255,0.06)", borderRadius: "16px", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", padding: "1.5rem", border: "1px solid rgba(255,255,255,0.1)" }}>
+                    <h3 style={{ width: "100%", fontSize: "0.85rem", textTransform: "uppercase", color: "#94a3b8", margin: 0, letterSpacing: "0.05em" }}>Resolution Efficiency</h3>
                     <div style={{ width: "120px", height: "120px", marginTop: "1rem", position: "relative" }}>
                         <Doughnut
                             data={resolutionData}
                             options={{ maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } } }}
                         />
-                        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", fontSize: "1.5rem", fontWeight: "bold", color: "#2D3748" }}>
+                        <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", fontSize: "1.5rem", fontWeight: "bold", color: "#f1f5f9" }}>
                             {resolutionRate}%
                         </div>
                     </div>
                 </div>
 
                 {/* Card 3: Pending Critical (Enhanced) */}
-                <div className="card" style={{ background: "linear-gradient(135deg, #fff5f5 0%, #fff 100%)", borderRadius: "16px", boxShadow: "0 4px 6px rgba(229, 62, 62, 0.1)", padding: "1.5rem", borderLeft: "4px solid #F56565" }}>
-                    <h3 style={{ fontSize: "0.85rem", textTransform: "uppercase", color: "#E53E3E", margin: 0, fontWeight: "bold" }}>Attention Required</h3>
+                <div className="card" style={{ background: "linear-gradient(135deg, rgba(254,242,242,0.12) 0%, rgba(255,255,255,0.04) 100%)", borderRadius: "16px", boxShadow: "0 8px 32px rgba(244,63,94,0.12)", padding: "1.5rem", borderLeft: "4px solid #f43f5e" }}>
+                    <h3 style={{ fontSize: "0.85rem", textTransform: "uppercase", color: "#fb7185", margin: 0, fontWeight: "bold" }}>Attention Required</h3>
                     <div style={{ marginTop: "1.2rem", display: "flex", alignItems: "baseline", gap: "5px" }}>
-                        <span style={{ fontSize: "2.5rem", fontWeight: "700", color: "#C53030" }}>{stats.pending}</span>
-                        <span style={{ color: "#E53E3E" }}>issues pending</span>
+                        <span style={{ fontSize: "2.5rem", fontWeight: "700", color: "#fda4af" }}>{stats.pending}</span>
+                        <span style={{ color: "#fb7185" }}>issues pending</span>
                     </div>
-                    <div style={{ marginTop: "1rem", height: "6px", background: "rgba(229, 62, 62, 0.1)", borderRadius: "3px" }}>
-                        <div style={{ width: `${(stats.pending / (stats.total || 1)) * 100}%`, height: "100%", background: "#F56565", borderRadius: "3px" }}></div>
+                    <div style={{ marginTop: "1rem", height: "6px", background: "rgba(244, 63, 94, 0.15)", borderRadius: "3px" }}>
+                        <div style={{ width: `${(stats.pending / (stats.total || 1)) * 100}%`, height: "100%", background: "linear-gradient(90deg,#f43f5e,#fb7185)", borderRadius: "3px" }}></div>
                     </div>
                 </div>
 
@@ -166,15 +166,15 @@ const Dashboard = () => {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))", gap: "1.5rem" }}>
 
                 {/* Chart 1: Issues by Department */}
-                <div className="card" style={{ background: "white", borderRadius: "16px", padding: "1.5rem", boxShadow: "0 4px 6px rgba(0,0,0,0.05)" }}>
-                    <h3 style={{ margin: "0 0 1.5rem 0", fontSize: "1rem", fontWeight: "600", color: "#4A5568" }}>Department Workload</h3>
+                <div className="card" style={{ background: "rgba(255,255,255,0.06)", borderRadius: "16px", padding: "1.5rem", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                    <h3 style={{ margin: "0 0 1.5rem 0", fontSize: "1rem", fontWeight: "600", color: "#f1f5f9" }}>Department Workload</h3>
                     <div style={{ height: "250px" }}>
                         <Bar
                             data={deptData}
                             options={{
                                 responsive: true,
                                 maintainAspectRatio: false,
-                                scales: { y: { beginAtZero: true, grid: { borderDash: [2, 4], color: "#EDF2F7" } }, x: { grid: { display: false } } },
+                                scales: { y: { beginAtZero: true, grid: { borderDash: [2, 4], color: "rgba(255,255,255,0.08)" } }, x: { grid: { display: false } } },
                                 plugins: { legend: { display: false } }
                             }}
                         />
@@ -182,8 +182,8 @@ const Dashboard = () => {
                 </div>
 
                 {/* Chart 2: Severity Breakdown */}
-                <div className="card" style={{ background: "white", borderRadius: "16px", padding: "1.5rem", boxShadow: "0 4px 6px rgba(0,0,0,0.05)" }}>
-                    <h3 style={{ margin: "0 0 1.5rem 0", fontSize: "1rem", fontWeight: "600", color: "#4A5568" }}>Issues by Severity</h3>
+                <div className="card" style={{ background: "rgba(255,255,255,0.06)", borderRadius: "16px", padding: "1.5rem", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                    <h3 style={{ margin: "0 0 1.5rem 0", fontSize: "1rem", fontWeight: "600", color: "#f1f5f9" }}>Issues by Severity</h3>
                     <div style={{ height: "250px" }}>
                         <Bar
                             data={severityData}
@@ -191,7 +191,7 @@ const Dashboard = () => {
                                 indexAxis: 'y',
                                 responsive: true,
                                 maintainAspectRatio: false,
-                                scales: { x: { beginAtZero: true, grid: { borderDash: [2, 4], color: "#EDF2F7" } }, y: { grid: { display: false } } },
+                                scales: { x: { beginAtZero: true, grid: { borderDash: [2, 4], color: "rgba(255,255,255,0.08)" } }, y: { grid: { display: false } } },
                                 plugins: { legend: { display: false } }
                             }}
                         />

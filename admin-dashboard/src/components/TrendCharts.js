@@ -67,10 +67,10 @@ const TrendCharts = () => {
     maintainAspectRatio: false,
     interaction: { mode: "index", intersect: false },
     scales: {
-      y: { beginAtZero: true, grid: { borderDash: [2, 4], color: "#EDF2F7" } },
-      x: { grid: { display: false }, ticks: { maxTicksLimit: 12, maxRotation: 0 } },
+      y: { beginAtZero: true, grid: { borderDash: [2, 4], color: "rgba(255,255,255,0.08)" }, ticks: { color: "rgba(255,255,255,0.55)" } },
+      x: { grid: { display: false }, ticks: { maxTicksLimit: 12, maxRotation: 0, color: "rgba(255,255,255,0.55)" } },
     },
-    plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 11 } } } },
+    plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 11 }, color: "rgba(255,255,255,0.7)" } } },
   };
 
   const hint = data
@@ -81,32 +81,33 @@ const TrendCharts = () => {
   const btnStyle = (active) => ({
     padding: "5px 14px", borderRadius: "8px", border: "none", cursor: "pointer",
     fontSize: "0.8rem", fontWeight: 700,
-    background: active ? "#2B6CB0" : "#EDF2F7",
-    color: active ? "#fff" : "#4A5568",
+    background: active ? "#6366F1" : "rgba(255,255,255,0.08)",
+    color: active ? "#fff" : "#cbd5e1",
     transition: "all 0.2s",
   });
 
   return (
     <div className="card" style={{
-      background: "white", borderRadius: "16px", padding: "1.5rem",
-      boxShadow: "0 4px 6px rgba(0,0,0,0.05)", gridColumn: "1 / -1"
+      background: "rgba(255,255,255,0.06)", borderRadius: "16px", padding: "1.5rem",
+      boxShadow: "0 8px 32px rgba(0,0,0,0.18)", gridColumn: "1 / -1",
+      border: "1px solid rgba(255,255,255,0.1)"
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem" }}>
         <div>
-          <h3 style={{ margin: 0, fontSize: "1rem", fontWeight: 600, color: "#4A5568" }}>
+          <h3 style={{ margin: 0, fontSize: "1rem", fontWeight: 600, color: "#f1f5f9" }}>
             📈 Real-Time Reporting Trends
           </h3>
-          <p style={{ margin: "3px 0 0", fontSize: "0.8rem", color: "#718096" }}>
+          <p style={{ margin: "3px 0 0", fontSize: "0.8rem", color: "#94a3b8" }}>
             {loading ? "Computing series…" : hint}
           </p>
         </div>
         <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-          <div style={{ display: "flex", gap: "6px", background: "#fff", border: "1px solid #E2E8F0", borderRadius: "10px", padding: "3px" }}>
+          <div style={{ display: "flex", gap: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "10px", padding: "3px" }}>
             {[7, 30, 90].map((d) => (
               <button key={d} onClick={() => toggle("days", d)} style={btnStyle(days === d)}>{d}d</button>
             ))}
           </div>
-          <div style={{ display: "flex", gap: "6px", background: "#fff", border: "1px solid #E2E8F0", borderRadius: "10px", padding: "3px" }}>
+          <div style={{ display: "flex", gap: "6px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "10px", padding: "3px" }}>
             <button onClick={() => toggle("granularity", "daily")} style={btnStyle(granularity === "daily")}>Daily</button>
             <button onClick={() => toggle("granularity", "hourly")} style={btnStyle(granularity === "hourly")}>Hourly</button>
           </div>
@@ -115,9 +116,9 @@ const TrendCharts = () => {
 
       <div style={{ marginTop: "1rem", height: "260px", position: "relative" }}>
         {loading ? (
-          <div style={{ textAlign: "center", color: "#A0AEC0", paddingTop: "5rem" }}>Aggregating time series…</div>
+          <div style={{ textAlign: "center", color: "#94a3b8", paddingTop: "5rem" }}>Aggregating time series…</div>
         ) : noData ? (
-          <div style={{ textAlign: "center", color: "#A0AEC0", paddingTop: "5rem" }}>
+          <div style={{ textAlign: "center", color: "#94a3b8", paddingTop: "5rem" }}>
             Not enough dated reports to draw a trend line yet.
           </div>
         ) : (

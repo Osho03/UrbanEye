@@ -35,22 +35,22 @@ const AnomalyAlerts = () => {
       {anomalies.length === 0 ? (
         <div style={{
           display: "flex", alignItems: "center", gap: "10px",
-          background: "#F0FFF4", border: "1px solid #C6F6D5",
+          background: "rgba(34,197,94,0.12)", border: "1px solid rgba(74,222,128,0.3)",
           borderRadius: "12px", padding: "0.7rem 1.2rem",
-          color: "#276749", fontSize: "0.88rem"
+          color: "#4ADE80", fontSize: "0.88rem"
         }}>
           <span style={{
-            width: "9px", height: "9px", borderRadius: "50%", background: "#48BB78",
-            boxShadow: "0 0 0 4px rgba(72,187,120,0.18)"
+            width: "9px", height: "9px", borderRadius: "50%", background: "#4ADE80",
+            boxShadow: "0 0 0 4px rgba(74,222,128,0.18)"
           }} />
           <strong>Anomaly Watch:</strong> no abnormal activity detected in the last {result.window_hours}h
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
-          <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#C53030", display: "flex", alignItems: "center", gap: "8px" }}>
+          <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#FDA4AF", display: "flex", alignItems: "center", gap: "8px" }}>
             <span style={{
-              width: "10px", height: "10px", borderRadius: "50%", background: "#E53E3E",
-              boxShadow: "0 0 0 4px rgba(229,62,62,0.2)", animation: "ane-heartbeat 1.4s infinite"
+              width: "10px", height: "10px", borderRadius: "50%", background: "#F43F5E",
+              boxShadow: "0 0 0 4px rgba(244,63,94,0.2)", animation: "ane-heartbeat 1.4s infinite"
             }} />
             {result.summary}
           </div>
@@ -59,7 +59,7 @@ const AnomalyAlerts = () => {
             return (
               <div key={a.issue_type} style={{
                 display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap",
-                background: style.bg === "#fff" ? "#FFF5F5" : style.bg,
+                background: "rgba(255,255,255,0.05)",
                 border: `1px solid ${style.border}`,
                 borderRadius: "12px", padding: "0.7rem 1.2rem"
               }}>
@@ -70,11 +70,11 @@ const AnomalyAlerts = () => {
                 }}>
                   {a.severity.toUpperCase()}
                 </span>
-                <span style={{ flex: 1, fontSize: "0.88rem", color: style.color, minWidth: "200px" }}>
+                <span style={{ flex: 1, fontSize: "0.88rem", color: "#f8fafc", minWidth: "200px" }}>
                   {a.message}
                 </span>
                 <span style={{
-                  background: "rgba(255,255,255,0.85)", color: "#2D3748",
+                  background: "rgba(255,255,255,0.1)", color: "#e2e8f0",
                   fontSize: "0.78rem", fontWeight: 600,
                   padding: "3px 10px", borderRadius: "10px"
                 }}>

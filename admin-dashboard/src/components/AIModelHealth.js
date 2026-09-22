@@ -156,8 +156,8 @@ const AIModelHealth = () => {
                     <p style={{ fontSize: "0.75rem", color: "#718096", marginBottom: "0.75rem", textTransform: "uppercase" }}>Live Benchmark Charts</p>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1rem" }}>
                         {chartList.map(([label, url]) => (
-                            <div key={label} style={{ background: "#fff", borderRadius: "12px", padding: "0.75rem", boxShadow: "0 2px 6px rgba(0,0,0,0.04)" }}>
-                                <p style={{ fontSize: "0.75rem", fontWeight: "600", color: "#2D3748", margin: "0 0 0.5rem" }}>{label}</p>
+                            <div key={label} style={{ background: "rgba(255,255,255,0.05)", borderRadius: "12px", padding: "0.75rem", border: "1px solid rgba(255,255,255,0.1)" }}>
+                                <p style={{ fontSize: "0.75rem", fontWeight: "600", color: "#f1f5f9", margin: "0 0 0.5rem" }}>{label}</p>
                                 <img src={url} alt={label} style={{ width: "100%", borderRadius: "8px" }} onError={(e) => (e.target.style.visibility = "hidden")} />
                             </div>
                         ))}

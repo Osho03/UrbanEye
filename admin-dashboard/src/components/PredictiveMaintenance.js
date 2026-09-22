@@ -36,8 +36,8 @@ const PredictiveMaintenance = () => {
     }
 
     return (
-        <div className="card" style={{ borderLeft: "4px solid #e53e3e", backgroundColor: "#fff5f5" }}>
-            <h3 style={{ marginTop: 0, color: "#c53030", display: "flex", alignItems: "center", gap: "10px" }}>
+        <div className="card" style={{ borderLeft: "4px solid #f43f5e", background: "rgba(244,63,94,0.06)" }}>
+            <h3 style={{ marginTop: 0, color: "#FB7185", display: "flex", alignItems: "center", gap: "10px" }}>
                 🧠 Predictive Maintenance Required
                 <span className="badge badge-pending">{hotspots.length} Zones</span>
             </h3>
@@ -45,16 +45,15 @@ const PredictiveMaintenance = () => {
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                 {hotspots.map((hotspot, index) => (
                     <div key={index} style={{
-                        background: "white",
+                        background: "rgba(255,255,255,0.05)",
                         padding: "1rem",
-                        borderRadius: "8px",
-                        border: "1px solid #fc8181",
-                        boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
+                        borderRadius: "10px",
+                        border: "1px solid rgba(244,63,94,0.35)"
                     }}>
-                        <h4 style={{ margin: "0 0 0.5rem 0", color: "#e53e3e" }}>
+                        <h4 style={{ margin: "0 0 0.5rem 0", color: "#FDA4AF" }}>
                             ⚠️ {hotspot.recommendation}
                         </h4>
-                        <div style={{ fontSize: "0.9rem", color: "#4a5568" }}>
+                        <div style={{ fontSize: "0.9rem", color: "#cbd5e1" }}>
                             <p style={{ margin: "0.25rem 0" }}>
                                 <strong>Density:</strong> {hotspot.count} issues within {hotspot.radius}m
                             </p>
