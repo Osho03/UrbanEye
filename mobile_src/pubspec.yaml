@@ -33,7 +33,7 @@ dependencies:
   geocoding: ^3.0.0
 
   # Voice / Speech
-  speech_to_text: ^6.6.0
+  speech_to_text: ^7.4.0
 
   # Map
   flutter_map: ^6.1.0

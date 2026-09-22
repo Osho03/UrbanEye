@@ -11,7 +11,7 @@ import '../models/issue_model.dart';
 class ApiService {
   // For Android emulator: 10.0.2.2 maps to host machine's localhost
   // For physical device: use your computer's local IP address
-  static String baseUrl = 'https://twenty-webs-fall.loca.lt';
+  static String baseUrl = 'https://urbaneye-backend-kzb6.onrender.com';
 
   /// Initialize URL from SharedPreferences
   static Future<void> init() async {
