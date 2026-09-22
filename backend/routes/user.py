@@ -197,6 +197,11 @@ def get_profile(user_id):
                 "email": user["email"],
                 "phone": user.get("phone", ""),
                 "role": user.get("role", "citizen"),
+                "age": user.get("age"),
+                "gender": user.get("gender"),
+                "notifications_enabled": user.get("notifications_enabled", True),
+                "notify_status_updates": user.get("notify_status_updates", True),
+                "notify_digest": user.get("notify_digest", False),
                 "created_at": user.get("created_at", "").isoformat() if user.get("created_at") else None
             }
         })
@@ -213,6 +218,20 @@ def update_profile(user_id):
             update_fields["name"] = data["name"].strip()
         if "phone" in data:
             update_fields["phone"] = data["phone"].strip()
+        if "age" in data:
+            try:
+                update_fields["age"] = int(data["age"])
+            except (TypeError, ValueError):
+                return jsonify({"success": False, "message": "Age must be a number"}), 400
+        if "gender" in data:
+            update_fields["gender"] = data["gender"].strip()
+        # Notification preferences
+        if "notifications_enabled" in data:
+            update_fields["notifications_enabled"] = bool(data["notifications_enabled"])
+        if "notify_status_updates" in data:
+            update_fields["notify_status_updates"] = bool(data["notify_status_updates"])
+        if "notify_digest" in data:
+            update_fields["notify_digest"] = bool(data["notify_digest"])
 
         if not update_fields:
             return jsonify({"success": False, "message": "No fields to update"}), 400
@@ -261,6 +280,68 @@ def get_user_reports(user_id):
             "issues": issues
         })
 
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 400
+
+@user_bp.route('/notifications/<user_id>', methods=['GET'])
+def get_user_notifications(user_id):
+    """Aggregate status updates / notifications for all of a user's reports,
+    newest first. Powers the mobile in-app real-time notification feed."""
+    try:
+        user = users_collection.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            return jsonify({"success": False, "message": "User not found"}), 404
+
+        issues = list(issues_collection.find({
+            "$or": [
+                {"reported_by": user["name"]},
+                {"reporter_email": user["email"]}
+            ]
+        }))
+
+        items = []
+        for iss in issues:
+            issue_title = iss.get("title") or ""
+            issue_type = iss.get("issue_type", "report")
+            history = iss.get("status_history") or []
+            # Walk backwards so the newest change sorts first
+            for entry in reversed(history):
+                raw_ts = entry.get("changed_at")
+                if isinstance(raw_ts, datetime):
+                    ts = raw_ts.isoformat() + "Z"
+                else:
+                    try:
+                        ts = datetime.fromisoformat(str(raw_ts).replace("Z", ""))
+                        ts = ts.isoformat() + "Z"
+                    except (ValueError, TypeError):
+                        ts = str(raw_ts)
+                items.append({
+                    "issue_id": str(iss["_id"]),
+                    "issue_title": issue_title,
+                    "issue_type": issue_type,
+                    "status": entry.get("status"),
+                    "comment": entry.get("comment"),
+                    "changed_by": entry.get("changed_by", "System"),
+                    "changed_at": ts,
+                })
+
+        try:
+            items.sort(key=lambda x: x["changed_at"], reverse=True)
+        except Exception:
+            pass
+
+        prefs = {
+            "notifications_enabled": user.get("notifications_enabled", True),
+            "notify_status_updates": user.get("notify_status_updates", True),
+            "notify_digest": user.get("notify_digest", False),
+        }
+
+        return jsonify({
+            "success": True,
+            "count": len(items),
+            "notifications": items,
+            "prefs": prefs
+        })
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 400
 

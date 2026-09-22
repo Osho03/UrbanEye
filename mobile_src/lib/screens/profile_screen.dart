@@ -5,6 +5,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
+import 'personal_info_screen.dart';
+import 'notifications_screen.dart';
+import 'privacy_security_screen.dart';
+import 'about_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -21,6 +25,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _loadStats();
+    _refreshProfile();
+  }
+
+  Future<void> _refreshProfile() async {
+    try {
+      final auth = Provider.of<AuthService>(context, listen: false);
+      await auth.refreshProfile();
+    } catch (e) {
+      // offline - cached user is fine
+    }
+  }
+
+  String _infoSubtitle(AuthService auth) {
+    final parts = <String>[
+      if (auth.currentUser?.phone?.isNotEmpty ?? false)
+        auth.currentUser!.phone!,
+      if (auth.currentUser?.age != null) 'Age: ${auth.currentUser!.age}',
+      if (auth.currentUser?.gender?.isNotEmpty ?? false)
+        auth.currentUser!.gender!,
+    ];
+    return parts.isNotEmpty ? parts.join(' · ') : 'Name, phone, age and gender';
   }
 
   Future<void> _loadStats() async {
@@ -119,33 +144,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             // Actions
             _ProfileAction(
-              icon: Icons.person_outline,
-              title: 'Edit Profile',
-              subtitle: 'Update your name and phone',
-              onTap: () => _showEditProfile(context, auth),
+              icon: Icons.badge_outlined,
+              title: 'Personal Information',
+              subtitle: _infoSubtitle(auth),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const PersonalInfoScreen()),
+              ),
+            ),
+            _ProfileAction(
+              icon: Icons.notifications_outlined,
+              title: 'Notifications',
+              subtitle: 'Real-time alerts for your reports',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const NotificationsScreen()),
+              ),
+            ),
+            _ProfileAction(
+              icon: Icons.privacy_tip_outlined,
+              title: 'Privacy & Security',
+              subtitle: 'How your data is protected',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => const PrivacySecurityScreen()),
+              ),
+            ),
+            _ProfileAction(
+              icon: Icons.info_outline,
+              title: 'About UrbanEye',
+              subtitle: 'Version 1.0.0',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AboutScreen()),
+              ),
             ),
             _ProfileAction(
               icon: Icons.dns_outlined,
               title: 'Server Settings',
               subtitle: ApiService.baseUrl,
               onTap: () => _showServerConfig(context),
-            ),
-            _ProfileAction(
-              icon: Icons.info_outline,
-              title: 'About UrbanEye',
-              subtitle: 'Version 1.0.0',
-              onTap: () {
-                showAboutDialog(
-                  context: context,
-                  applicationName: 'UrbanEye',
-                  applicationVersion: '1.0.0',
-                  applicationLegalese: '© 2026 UrbanEye Team',
-                  children: [
-                    const SizedBox(height: 16),
-                    const Text('AI-Powered Citizen Reporting System for smart city governance.'),
-                  ],
-                );
-              },
             ),
 
             const SizedBox(height: 24),
@@ -188,58 +229,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showEditProfile(BuildContext context, AuthService auth) {
-    final nameController = TextEditingController(text: auth.userName);
-    final phoneController = TextEditingController(text: auth.currentUser?.phone ?? '');
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Edit Profile'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Name', prefixIcon: Icon(Icons.person)),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: phoneController,
-              decoration: const InputDecoration(labelText: 'Phone', prefixIcon: Icon(Icons.phone)),
-              keyboardType: TextInputType.phone,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () async {
-              final name = nameController.text.trim();
-              final phone = phoneController.text.trim();
-              if (name.isNotEmpty) {
-                try {
-                  await ApiService.updateProfile(
-                    auth.userId,
-                    name: name,
-                    phone: phone,
-                  );
-                  await auth.updateLocalUser(name: name, phone: phone);
-                } catch (e) {
-                  // Still update locally
-                  await auth.updateLocalUser(name: name, phone: phone);
-                }
-                if (ctx.mounted) Navigator.pop(ctx);
-              }
-            },
-            child: const Text('Save'),
-          ),
-        ],
       ),
     );
   }

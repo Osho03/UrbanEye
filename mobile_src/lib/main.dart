@@ -13,6 +13,7 @@ import 'screens/my_reports_screen.dart';
 import 'screens/map_screen.dart';
 import 'screens/profile_screen.dart';
 import 'services/api_service.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +32,14 @@ void main() async {
   final authService = AuthService();
   await authService.loadUser();
   await ApiService.init();
+
+  // Prepare local-notification channel / permission
+  try {
+    await NotificationService.instance.init();
+  } catch (e) {
+    // Notifications are best-effort; never block startup.
+    print('Notification init failed: $e');
+  }
 
   runApp(
     ChangeNotifierProvider.value(

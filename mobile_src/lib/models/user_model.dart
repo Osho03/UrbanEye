@@ -6,6 +6,11 @@ class User {
   final String? phone;
   final String? role;
   final String? token;
+  final int? age;
+  final String? gender;
+  final bool notificationsEnabled;
+  final bool notifyStatusUpdates;
+  final bool notifyDigest;
 
   User({
     required this.userId,
@@ -14,6 +19,11 @@ class User {
     this.phone,
     this.role,
     this.token,
+    this.age,
+    this.gender,
+    this.notificationsEnabled = true,
+    this.notifyStatusUpdates = true,
+    this.notifyDigest = false,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -24,6 +34,11 @@ class User {
       phone: json['phone'] as String?,
       role: json['role'] as String?,
       token: json['token'] as String?,
+      age: json['age'] is num ? (json['age'] as num).toInt() : json['age'] as int?,
+      gender: json['gender'] as String?,
+      notificationsEnabled: json['notifications_enabled'] ?? true,
+      notifyStatusUpdates: json['notify_status_updates'] ?? true,
+      notifyDigest: json['notify_digest'] ?? false,
     );
   }
 
@@ -35,6 +50,11 @@ class User {
       'phone': phone,
       'role': role,
       'token': token,
+      'age': age,
+      'gender': gender,
+      'notifications_enabled': notificationsEnabled,
+      'notify_status_updates': notifyStatusUpdates,
+      'notify_digest': notifyDigest,
     };
   }
 }

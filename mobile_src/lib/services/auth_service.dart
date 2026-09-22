@@ -117,7 +117,15 @@ class AuthService extends ChangeNotifier {
   }
 
   /// Update user info locally after profile edit
-  Future<void> updateLocalUser({String? name, String? phone}) async {
+  Future<void> updateLocalUser({
+    String? name,
+    String? phone,
+    int? age,
+    String? gender,
+    bool? notificationsEnabled,
+    bool? notifyStatusUpdates,
+    bool? notifyDigest,
+  }) async {
     if (_currentUser != null) {
       _currentUser = User(
         userId: _currentUser!.userId,
@@ -126,9 +134,42 @@ class AuthService extends ChangeNotifier {
         phone: phone ?? _currentUser!.phone,
         role: _currentUser!.role,
         token: _currentUser!.token,
+        age: age ?? _currentUser!.age,
+        gender: gender ?? _currentUser!.gender,
+        notificationsEnabled: notificationsEnabled ?? _currentUser!.notificationsEnabled,
+        notifyStatusUpdates: notifyStatusUpdates ?? _currentUser!.notifyStatusUpdates,
+        notifyDigest: notifyDigest ?? _currentUser!.notifyDigest,
       );
       await _saveUser();
       notifyListeners();
+    }
+  }
+
+  /// Pull the latest profile (age/gender/notification prefs) from the server.
+  Future<void> refreshProfile() async {
+    if (_currentUser == null) return;
+    try {
+      final res = await ApiService.getProfile(_currentUser!.userId);
+      if (res['success'] == true && res['user'] != null) {
+        final u = res['user'] as Map<String, dynamic>;
+        _currentUser = User(
+          userId: u['user_id'] as String,
+          name: u['name'] as String,
+          email: u['email'] as String,
+          phone: u['phone'] as String?,
+          role: u['role'] as String?,
+          token: _currentUser!.token,
+          age: u['age'] is num ? (u['age'] as num).toInt() : u['age'] as int?,
+          gender: u['gender'] as String?,
+          notificationsEnabled: u['notifications_enabled'] ?? true,
+          notifyStatusUpdates: u['notify_status_updates'] ?? true,
+          notifyDigest: u['notify_digest'] ?? false,
+        );
+        await _saveUser();
+        notifyListeners();
+      }
+    } catch (e) {
+      print('Error refreshing profile: $e');
     }
   }
 }
