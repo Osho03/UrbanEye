@@ -283,6 +283,33 @@ def get_user_reports(user_id):
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 400
 
+@user_bp.route("/fcm-token", methods=["POST"])
+def register_fcm_token():
+    """Register a Firebase Cloud Messaging device token for a citizen."""
+    data = request.json or {}
+    user_id = data.get("user_id")
+    token = (data.get("token") or "").strip()
+
+    if not user_id or not token:
+        return jsonify({"success": False, "message": "user_id and token required"}), 400
+    if not ObjectId.is_valid(user_id):
+        return jsonify({"success": False, "message": "Invalid user_id"}), 400
+
+    user = users_collection.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        return jsonify({"success": False, "message": "User not found"}), 404
+
+    tokens = [t for t in (user.get("fcm_tokens") or []) if isinstance(t, str)]
+    if token not in tokens:
+        tokens.append(token)
+    # Keep only the most recent 5 tokens per user.
+    users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": {"fcm_tokens": tokens[-5:]}},
+    )
+    return jsonify({"success": True, "message": "FCM token registered"})
+
+
 @user_bp.route('/notifications/<user_id>', methods=['GET'])
 def get_user_notifications(user_id):
     """Aggregate status updates / notifications for all of a user's reports,

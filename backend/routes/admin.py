@@ -210,6 +210,34 @@ def update_issue_status(issue_id):
                 except Exception as e:
                     print(f"Notification error (non-critical): {e}")
         
+        # Phase 11: FCM push to the citizen's device(s) - real-time notifications
+        try:
+            from services.fcm_service import send_status_update, is_configured
+
+            if result.modified_count > 0 and send_notification and is_configured():
+                from config import users_collection
+                reporter = None
+                if issue.get("reporter_email"):
+                    reporter = users_collection.find_one({"email": issue.get("reporter_email")})
+                if reporter is None:
+                    reporter = users_collection.find_one({"name": issue.get("reported_by")})
+                reported_name = issue.get("reported_by")
+                if reporter is None and reported_name:
+                    reporter = users_collection.find_one({"name": reported_name})
+                if reporter is not None:
+                    tokens = reporter.get("fcm_tokens") or []
+                    if tokens:
+                        send_status_update(
+                            tokens,
+                            issue_title=issue.get("title") or "Your report",
+                            status=new_status,
+                            admin_remarks=admin_remarks,
+                            issue_id=issue_id,
+                            changed_at=datetime.now().isoformat() + "Z",
+                        )
+        except Exception as e:
+            print(f"FCM push error (non-critical): {e}")
+        
         if result.modified_count > 0:
             return jsonify({"success": True})
         return jsonify({"success": False, "message": "No changes made"}), 400

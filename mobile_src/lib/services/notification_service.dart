@@ -92,6 +92,16 @@ class NotificationService {
     return [];
   }
 
+  /// Fire a plain local notification (used by FCM foreground messages).
+  Future<void> showLocal(String title, String body) async {
+    await _plugin.show(
+      id: (title + body).hashCode,
+      title: title,
+      body: body,
+      notificationDetails: const NotificationDetails(android: _channel),
+    );
+  }
+
   Future<void> _show(Map<String, dynamic> item) async {
     final status = (item['status'] as String? ?? 'Updated');
     final title = (item['issue_title'] as String? ?? 'Your report');

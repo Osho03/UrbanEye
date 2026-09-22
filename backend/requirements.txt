@@ -19,3 +19,6 @@ opencv-python-headless
 # ONNX Runtime runs the exported civic_yolov8.onnx WITHOUT torch, keeping
 # the backend inside low-RAM free tiers (Render = 512 MB).
 onnxruntime
+
+# Phase 11: Firebase Cloud Messaging push notifications
+firebase-admin

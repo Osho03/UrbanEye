@@ -14,6 +14,7 @@ import 'screens/map_screen.dart';
 import 'screens/profile_screen.dart';
 import 'services/api_service.dart';
 import 'services/notification_service.dart';
+import 'services/fcm_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +40,14 @@ void main() async {
   } catch (e) {
     // Notifications are best-effort; never block startup.
     print('Notification init failed: $e');
+  }
+
+  // Firebase Cloud Messaging (real push). No-ops if google-services.json
+  // is not present, so the app still builds/runs without Firebase.
+  try {
+    await FcmService.instance.init();
+  } catch (e) {
+    print('FCM init failed: $e');
   }
 
   runApp(

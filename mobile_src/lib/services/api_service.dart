@@ -122,6 +122,25 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
+  /// Register this device's Firebase Cloud Messaging token for push updates.
+  static Future<bool> registerFcmToken({
+    required String userId,
+    required String token,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/user/fcm-token'),
+        headers: _getHeaders(contentType: 'application/json'),
+        body: jsonEncode({'user_id': userId, 'token': token}),
+      );
+      final data = jsonDecode(response.body);
+      return data['success'] == true;
+    } catch (e) {
+      print('Error registering FCM token: $e');
+      return false;
+    }
+  }
+
   /// Fetch the aggregated notification feed for a user (newest first).
   static Future<List<Map<String, dynamic>>> getUserNotifications(
       String userId) async {
