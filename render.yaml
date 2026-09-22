@@ -11,3 +11,8 @@ services:
         sync: false
       - key: GEMINI_API_KEY
         sync: false
+      # Firebase Cloud Messaging - paste the FULL service-account JSON string
+      # (Firebase console -> Project settings -> Service accounts
+      #  -> Generate new private key) as the value of this secret.
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false
