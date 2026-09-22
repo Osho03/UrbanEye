@@ -363,11 +363,18 @@ def get_user_notifications(user_id):
             "notify_digest": user.get("notify_digest", False),
         }
 
+        try:
+            from services.fcm_service import is_configured
+            fcm_configured = is_configured()
+        except Exception:
+            fcm_configured = False
+
         return jsonify({
             "success": True,
             "count": len(items),
             "notifications": items,
-            "prefs": prefs
+            "prefs": prefs,
+            "fcm_configured": fcm_configured,
         })
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 400
