@@ -8,6 +8,7 @@ import Dashboard from "./components/Dashboard";
 import IssueList from "./components/IssueList";
 import IssueDetail from "./components/IssueDetail";
 import MapView from "./components/MapView";
+import ReviewQueue from "./components/ReviewQueue";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(
@@ -64,6 +65,7 @@ function App() {
                 <nav className="sidebar">
                   <h2>🛡️ UrbanEye Admin</h2>
                   <a href="/dashboard" className="nav-link">📊 Dashboard</a>
+                  <a href="/review" className="nav-link">🧠 AI Review Queue</a>
                   <a href="/issues" className="nav-link">📋 Issue Management</a>
                   <a href="/map" className="nav-link">🌍 Map View</a>
                   <div className="mode-toggle" onClick={() => setDarkMode(!darkMode)}>
@@ -74,6 +76,7 @@ function App() {
                 <div className="main-content">
                   <Routes>
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/review" element={<ReviewQueue />} />
                     <Route path="/issues" element={<IssueList />} />
                     <Route path="/issues/:id" element={<IssueDetail />} />
                     <Route path="/map" element={<MapView />} />

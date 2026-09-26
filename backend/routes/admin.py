@@ -459,3 +459,93 @@ def serve_audio(filename):
         return send_from_directory(audio_dir, filename)
     except FileNotFoundError:
         return jsonify({"error": "Audio file not found"}), 404
+
+
+# ---------------------------------------------------------------------------
+# Active-learning review queue
+# ---------------------------------------------------------------------------
+
+@admin_bp.route("/review-queue", methods=["GET"])
+def ml_review_queue():
+    """
+    Citizen photo uploads the AI is least sure about, most-uncertain first.
+    Reviewing one puts it straight into the classifier's training set.
+    Optional query param: ?limit=20
+    """
+    try:
+        from ai.active_learning import build_queue
+    except ImportError as e:
+        return jsonify({"success": False, "message": str(e)}), 503
+    payload = build_queue(issues_collection,
+                          limit=request.args.get("limit", default=20, type=int))
+    return jsonify(payload), (200 if payload.get("success") else 500)
+
+
+@admin_bp.route("/review-queue/<issue_id>", methods=["POST"])
+def ml_review_decision(issue_id):
+    """
+    Record a reviewer's verdict on one queued photo.
+    Body: {action, label?, keep_box?, reviewer?}
+      action  confirm | relabel | reject | skip
+      label   required for relabel
+      keep_box  export the detector's box as YOLO ground truth (only honored
+                when the box's class matches the accepted label)
+    """
+    try:
+        from ai.active_learning import apply_label
+    except ImportError as e:
+        return jsonify({"success": False, "message": str(e)}), 503
+
+    data = request.json or {}
+    result = apply_label(
+        issues_collection, issue_id,
+        action=data.get("action"),
+        label=data.get("label"),
+        reviewer=data.get("reviewer") or "admin",
+        keep_box=bool(data.get("keep_box")),
+    )
+    return jsonify(result), result.get("code", 200)
+
+
+@admin_bp.route("/ml/stats", methods=["GET"])
+def ml_stats():
+    """Dataset balance + YOLO ground-truth progress for the health cards."""
+    try:
+        from ai.active_learning import queue_stats
+    except ImportError as e:
+        return jsonify({"error": str(e)}), 503
+    return jsonify(queue_stats(issues_collection))
+
+
+@admin_bp.route("/ml/retrain", methods=["POST"])
+def ml_retrain_now():
+    """
+    Force a full collect -> train -> guard -> hot-reload cycle. Useful right
+    after a batch of reviews, since the scheduled sweep waits for MIN_NEW
+    new images on its own cadence.
+    """
+    try:
+        from ai.auto_retrain import maybe_auto_retrain, model_health
+    except ImportError as e:
+        return jsonify({"status": "unavailable", "message": str(e)}), 503
+    result = maybe_auto_retrain(issues_collection, force=True, evaluate=True)
+    return jsonify({"retrain": result, "health": model_health()})
+
+
+@admin_bp.route("/ml/reconcile-uploads", methods=["GET", "POST"])
+def ml_reconcile_uploads():
+    """
+    Find real photos in uploads/ that no issue record points at and register
+    them as "unknown" issues so they enter the review queue.
+
+    GET  = dry run, reports what would happen
+    POST = create the records (?dry_run=1 to preview anyway)
+    """
+    try:
+        from ai.active_learning import reconcile_orphans
+    except ImportError as e:
+        return jsonify({"success": False, "message": str(e)}), 503
+    dry_run = request.method == "GET"
+    if request.method == "POST":
+        dry_run = str(request.args.get("dry_run", "")).lower() in ("1", "true")
+    return jsonify(reconcile_orphans(issues_collection, dry_run=dry_run))

@@ -48,6 +48,10 @@ def report_issue():
     media_type = "text"
     image_path = None
     issue_type = "unknown"
+    # Active-learning record. Stays empty when YOLO asserts nothing - the
+    # queue scores an "unknown" as maximally uncertain either way, and there
+    # are no boxes to keep.
+    ml_detections = []
     routing = get_routing_info("unknown")
     status = "Pending"
     linked_to = None
@@ -200,6 +204,7 @@ def report_issue():
                         }
                     }
                     print(f"✅ YOLOv8 Detection: {issue_type} ({severity_data['label']})")
+                    ml_detections = yolo_result.get("detections") or []
 
                     # Phase 3: Visual Detection Layer - paint boxes on the proof
                     from ai.annotate import annotate_detection
@@ -308,6 +313,11 @@ def report_issue():
         "issue_type": issue_type,
         "image_path": image_path,
         "detected_image": detected_image if media_type == "image" else None,  # Phase 3
+        # What the AI actually claimed, and the boxes it drew. Kept separate
+        # from issue_type so the active-learning queue can score the claim and
+        # so an admin can relabel without losing the detector's geometry.
+        "detection_confidence": detection_confidence,
+        "ml_detections": ml_detections,
         "status": status,
         "assigned_department": routing["dept"],
         "priority": routing["priority"],

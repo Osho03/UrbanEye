@@ -463,7 +463,7 @@ def _promote_candidate(decision):
         os.remove(MODEL_CANDIDATE)
     except OSError:
         pass
-    return decision
+    return {**decision, "promoted": True}
 
 
 def try_auto_retrain_async(issues_collection=None, force=False, evaluate=False):
